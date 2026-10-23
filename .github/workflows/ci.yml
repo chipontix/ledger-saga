@@ -1,0 +1,51 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - run: go vet ./... && go vet -tags integration ./...
+      - name: unit + property tests, race detector
+        run: go test -race -count=1 ./...
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Testcontainers (Postgres 17, Kafka 3.9), race detector
+        run: go test -race -tags integration -count=1 -timeout 15m -v ./internal/it/
+
+  chaos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: docker compose up -d --wait postgres kafka
+      - run: go build -race -o bin/ledgersaga ./cmd/ledgersaga
+      - name: crash matrix, one seed per point, race-enabled binaries
+        env:
+          PG_ADMIN_URL: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
+          KAFKA_BROKERS: localhost:9092
+        run: ./bin/ledgersaga chaos -seeds 1 -parallel 2 -out chaos-ci.md -json chaos-ci.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chaos
+          path: |
+            chaos-ci.md
+            chaos-ci.json
+            results/raw/

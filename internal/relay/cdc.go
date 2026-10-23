@@ -70,7 +70,11 @@ func (c *CDC) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	// Start does not return on its own when ctx ends; Close stops it.
+	go func() {
+		<-ctx.Done()
+		conn.Close()
+	}()
 	go c.retain(ctx)
 	conn.Start(ctx)
 	return ctx.Err()
