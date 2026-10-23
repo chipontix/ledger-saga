@@ -12,11 +12,9 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -107,23 +105,21 @@ func migrate(ctx context.Context, _ []string) error {
 }
 
 func createTopics(ctx context.Context, ts []kafka.TopicConfig) error {
+	client := &kafka.Client{Addr: kafka.TCP(brokers()...), Timeout: 10 * time.Second}
 	var err error
 	for range 30 { // the broker may still be starting
-		var conn *kafka.Conn
-		if conn, err = kafka.DialContext(ctx, "tcp", brokers()[0]); err == nil {
-			var ctrl kafka.Broker
-			if ctrl, err = conn.Controller(); err == nil {
-				var cc *kafka.Conn
-				if cc, err = kafka.DialContext(ctx, "tcp", net.JoinHostPort(ctrl.Host, strconv.Itoa(ctrl.Port))); err == nil {
-					err = cc.CreateTopics(ts...)
-					cc.Close()
+		var resp *kafka.CreateTopicsResponse
+		if resp, err = client.CreateTopics(ctx, &kafka.CreateTopicsRequest{Topics: ts}); err == nil {
+			for _, e := range resp.Errors {
+				if e != nil && !errors.Is(e, kafka.TopicAlreadyExists) {
+					err = e
 				}
 			}
-			conn.Close()
 		}
-		if err == nil || errors.Is(err, kafka.TopicAlreadyExists) {
+		if err == nil {
 			return nil
 		}
+		slog.Warn("create topics, retrying", "err", err)
 		time.Sleep(time.Second)
 	}
 	return err
@@ -154,9 +150,11 @@ func policy() saga.Policy {
 func chaosCfg() consumer.Chaos {
 	return consumer.Chaos{
 		Seed:      uint64(envInt("CHAOS_SEED", 0)),
+		Defer:     envFloat("CHAOS_DEFER", 0),
 		Dup:       envFloat("CHAOS_DUP", 0),
 		Delay:     envFloat("CHAOS_DELAY", 0),
 		Redeliver: envFloat("CHAOS_REDELIVER", 0),
+		MaxDelay:  envDur("CHAOS_MAX_DELAY", 200*time.Millisecond),
 		MaxLate:   envDur("CHAOS_MAX_LATE", time.Second),
 	}
 }
@@ -168,6 +166,16 @@ func decode[T any](value []byte, sentAt func(T) time.Time, name string) (T, erro
 	}
 	metrics.Delivery.WithLabelValues(name).Observe(time.Since(sentAt(v)).Seconds())
 	return v, nil
+}
+
+// chaosKey is saga+step: the same for every attempt of a step.
+func chaosKey(value []byte) string {
+	var m struct {
+		SagaID string `json:"saga_id"`
+		Step   string `json:"step"`
+	}
+	json.Unmarshal(value, &m)
+	return m.SagaID + "/" + m.Step
 }
 
 func orchestrator(ctx context.Context, _ []string) error {
@@ -183,7 +191,9 @@ func orchestrator(ctx context.Context, _ []string) error {
 
 	stop, err := consumer.Start(ctx, consumer.Config{
 		Name: "orchestrator", Brokers: brokers(), Topic: replies, Group: env("TOPIC_PREFIX", "") + "orchestrator",
-		Concurrency: envInt("CONSUMER_CONCURRENCY", 32), RetryEvery: env("RETRY_EVERY", "@every 10s"), Chaos: chaosCfg(),
+		Concurrency: envInt("CONSUMER_CONCURRENCY", 32), RetryEvery: env("RETRY_EVERY", "@every 10s"),
+		RetryWork: envDur("RETRY_WORK", 5*time.Second), Chaos: chaosCfg(),
+		SessionTimeout: envDur("KAFKA_SESSION_TIMEOUT", 6*time.Second), ChaosKey: chaosKey,
 	}, func(ctx context.Context, value []byte) (string, error) {
 		r, err := decode(value, func(r wire.Reply) time.Time { return r.SentAt }, "orchestrator")
 		if err != nil {
@@ -201,6 +211,11 @@ func orchestrator(ctx context.Context, _ []string) error {
 	defer stop()
 
 	go func() {
+		// A restarted orchestrator must not judge deadlines before its reply
+		// consumer is back in the group: replies that arrived while it was
+		// down are still unread, and timing out on them would cancel holds
+		// that succeeded. The grace covers the group session timeout.
+		sleepCtx(ctx, envDur("TIMEOUT_GRACE", 10*time.Second))
 		tick := time.NewTicker(envDur("SWEEP_EVERY", 100*time.Millisecond))
 		defer tick.Stop()
 		for {
@@ -228,6 +243,13 @@ func orchestrator(ctx context.Context, _ []string) error {
 	return nil
 }
 
+func sleepCtx(ctx context.Context, d time.Duration) {
+	select {
+	case <-ctx.Done():
+	case <-time.After(d):
+	}
+}
+
 func ledgerd(ctx context.Context, _ []string) error {
 	p, err := pool(ctx)
 	if err != nil {
@@ -238,7 +260,9 @@ func ledgerd(ctx context.Context, _ []string) error {
 	store := &ledger.Store{DB: p, Replies: replies}
 	stop, err := consumer.Start(ctx, consumer.Config{
 		Name: "ledger", Brokers: brokers(), Topic: commands, Group: env("TOPIC_PREFIX", "") + "ledger",
-		Concurrency: envInt("CONSUMER_CONCURRENCY", 32), RetryEvery: env("RETRY_EVERY", "@every 10s"), Chaos: chaosCfg(),
+		Concurrency: envInt("CONSUMER_CONCURRENCY", 32), RetryEvery: env("RETRY_EVERY", "@every 10s"),
+		RetryWork: envDur("RETRY_WORK", 5*time.Second), Chaos: chaosCfg(),
+		SessionTimeout: envDur("KAFKA_SESSION_TIMEOUT", 6*time.Second), ChaosKey: chaosKey,
 	}, func(ctx context.Context, value []byte) (string, error) {
 		c, err := decode(value, func(c wire.Command) time.Time { return c.SentAt }, "ledger")
 		if err != nil {

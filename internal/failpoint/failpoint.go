@@ -16,8 +16,8 @@ import (
 // Points is every crash point and the process it lives in. The chaos
 // harness iterates over this list.
 var Points = []struct{ Name, Process string }{
-	{"api.before_commit", "orchestrator"},      // saga row + hold command written, not committed
-	{"api.after_commit", "orchestrator"},       // committed, HTTP response not sent
+	{"api.before_commit", "orchestrator"},        // saga row + hold command written, not committed
+	{"api.after_commit", "orchestrator"},         // committed, HTTP response not sent
 	{"orch.reply.before_commit", "orchestrator"}, // transition computed, not committed
 	{"orch.reply.after_commit", "orchestrator"},  // committed, Kafka offset not committed
 	{"orch.timeout.before_commit", "orchestrator"},

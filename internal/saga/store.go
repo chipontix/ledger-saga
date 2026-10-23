@@ -180,7 +180,9 @@ func (s *Store) SweepTimeouts(ctx context.Context, limit int) (int, error) {
 			return 0, err
 		}
 	}
-	failpoint.Hit("orch.timeout.before_commit")
+	if len(due) > 0 {
+		failpoint.Hit("orch.timeout.before_commit")
+	}
 	return len(due), tx.Commit(ctx)
 }
 

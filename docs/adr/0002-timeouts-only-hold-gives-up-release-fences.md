@@ -38,6 +38,13 @@ funds for a saga that is already `CANCELLED`, and they would stay held
 forever. The property test finds exactly that within a few hundred schedules
 if the fence is removed (`money not conserved: ... held 1`).
 
+**Grace after start.** Deadlines are judged by the orchestrator, but replies
+are read by its consumer, which after a restart needs a consumer-group
+rebalance (up to the 6 s session timeout) before it reads anything. The
+sweeper therefore starts `TIMEOUT_GRACE` (10 s) after the process. Without
+it, the crash harness showed a restarted orchestrator cancelling transfers
+whose hold had succeeded, because the success was still unread in Kafka.
+
 ## Consequences
 
 - A saga only ends `CANCELLED` with zero net effect, whatever order hold and

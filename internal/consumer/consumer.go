@@ -15,12 +15,15 @@ package consumer
 import (
 	"context"
 	"errors"
+	"fmt"
+	"hash/fnv"
 	"log/slog"
 	"math/rand/v2"
 	"sync"
 	"time"
 
 	"github.com/Trendyol/kafka-konsumer/v2"
+	segkafka "github.com/segmentio/kafka-go"
 
 	"github.com/chipontix/ledger-saga/internal/metrics"
 )
@@ -41,8 +44,15 @@ type Config struct {
 	Topic       string
 	Group       string
 	Concurrency int
-	RetryEvery  string // cron spec for the retry topic, e.g. "@every 10s"
-	Chaos       Chaos
+	RetryEvery  string        // cron spec for the retry topic, e.g. "@every 10s"
+	RetryWork   time.Duration // how long each cron tick consumes; >= the interval means non-stop
+	// ChaosKey names what a message is about (e.g. saga+step, not attempt),
+	// so Chaos.Defer picks the same messages across retries.
+	ChaosKey func(value []byte) string
+	// SessionTimeout bounds how long partitions of a killed consumer stay
+	// assigned to it; the broker's floor is group.min.session.timeout.ms.
+	SessionTimeout time.Duration
+	Chaos          Chaos
 }
 
 func RetryTopic(topic string) string { return topic + ".retry" }
@@ -51,7 +61,7 @@ func DLQTopic(topic string) string   { return topic + ".dlq" }
 const inProcessAttempts = 4
 
 func Start(ctx context.Context, cfg Config, h Handler) (stop func(), err error) {
-	ch := newChaos(cfg.Chaos)
+	ch := newChaos(cfg.Chaos, cfg.ChaosKey)
 	process := func(m *kafka.Message) error {
 		var err error
 		for attempt := 1; attempt <= inProcessAttempts; attempt++ {
@@ -84,14 +94,15 @@ func Start(ctx context.Context, cfg Config, h Handler) (stop func(), err error) 
 			Topic:             cfg.Topic,
 			GroupID:           cfg.Group,
 			MaxWait:           250 * time.Millisecond,
-			SessionTimeout:    6 * time.Second,
-			RebalanceTimeout:  6 * time.Second,
-			HeartbeatInterval: time.Second,
+			SessionTimeout:    cfg.SessionTimeout,
+			RebalanceTimeout:  cfg.SessionTimeout,
+			HeartbeatInterval: cfg.SessionTimeout / 6,
 		},
 		Concurrency:          cfg.Concurrency,
 		MessageGroupDuration: 2 * time.Millisecond,
 		LogLevel:             kafka.LogLevelWarn,
-		ConsumeFn:            ch.wrap(process),
+		ConsumeFn:            ch.wrap(cfg.Topic, process),
+		TransactionalRetry:   kafka.NewBoolPtr(false), // rung 1 is ours, with backoff
 		DeadLetterTopic:      DLQTopic(cfg.Topic),
 		RetryEnabled:         true,
 		RetryConfiguration: kafka.RetryConfiguration{
@@ -99,10 +110,15 @@ func Start(ctx context.Context, cfg Config, h Handler) (stop func(), err error) 
 			Topic:               RetryTopic(cfg.Topic),
 			DeadLetterTopic:     DLQTopic(cfg.Topic),
 			StartTimeCron:       cfg.RetryEvery,
-			WorkDuration:        5 * time.Second,
+			WorkDuration:        cfg.RetryWork,
 			MaxRetry:            3,
 			BackOffStrategyName: "exponential",
 			LogLevel:            kafka.LogLevelWarn,
+			// Library defaults are acks=none (a retry could vanish) and a 1s
+			// batch timeout, which blocks the worker and, through the batch
+			// barrier, every message in flight with it.
+			ProducerRequiredAcks: segkafka.RequireAll,
+			ProducerBatchTimeout: time.Millisecond,
 		},
 	})
 	if err != nil {
@@ -117,41 +133,64 @@ func Start(ctx context.Context, cfg Config, h Handler) (stop func(), err error) 
 // redelivery of an already-processed message. Seeded, so a run repeats.
 type Chaos struct {
 	Seed      uint64
+	Defer     float64       // share of ChaosKeys whose first deliveries fail, so they travel the retry topic and arrive late
 	Dup       float64       // process the message twice in a row
-	Delay     float64       // hold the message back so later ones overtake it
+	Delay     float64       // hold the message back up to MaxDelay so later ones overtake it
 	Redeliver float64       // process it again after up to MaxLate
-	MaxLate   time.Duration // bound for Delay and Redeliver
+	MaxDelay  time.Duration // kafka-konsumer waits for the whole in-flight batch, so this stalls it
+	MaxLate   time.Duration
 }
 
 type chaos struct {
 	Chaos
+	key func([]byte) string
 	mu  sync.Mutex
 	rng *rand.Rand
 }
 
-func newChaos(c Chaos) *chaos {
-	return &chaos{Chaos: c, rng: rand.New(rand.NewPCG(c.Seed, c.Seed^0x5eed))}
+func newChaos(c Chaos, key func([]byte) string) *chaos {
+	return &chaos{Chaos: c, key: key, rng: rand.New(rand.NewPCG(c.Seed, c.Seed^0x5eed))}
 }
 
-func (c *chaos) roll(p float64) (bool, time.Duration) {
+// deferred is a pure function of (seed, key): every attempt of a chosen
+// saga step is late, while its compensation is chosen independently. That
+// is the schedule in which a release overtakes all of its holds.
+func (c *chaos) deferred(value []byte) bool {
+	if c.Defer == 0 || c.key == nil {
+		return false
+	}
+	h := fnv.New64a()
+	fmt.Fprintf(h, "%d|%s", c.Seed, c.key(value))
+	return float64(h.Sum64()%10000)/10000 < c.Defer
+}
+
+func (c *chaos) roll(p float64, upTo time.Duration) (bool, time.Duration) {
 	if p == 0 {
 		return false, 0
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.rng.Float64() < p, time.Duration(c.rng.Int64N(int64(c.MaxLate) + 1))
+	return c.rng.Float64() < p, time.Duration(c.rng.Int64N(int64(upTo) + 1))
 }
 
-func (c *chaos) wrap(process func(*kafka.Message) error) kafka.ConsumeFn {
+var errDeferred = errors.New("chaos: deferred to the retry topic")
+
+func (c *chaos) wrap(topic string, process func(*kafka.Message) error) kafka.ConsumeFn {
 	return func(m *kafka.Message) error {
-		if ok, d := c.roll(c.Delay); ok {
+		if m.Topic == topic { // only first deliveries, or it would loop into the DLQ
+			if c.deferred(m.Value) {
+				metrics.Consumed.WithLabelValues("chaos", "deferred").Inc()
+				return errDeferred
+			}
+		}
+		if ok, d := c.roll(c.Delay, c.MaxDelay); ok {
 			time.Sleep(d) // other workers keep committing later messages meanwhile
 		}
 		err := process(m)
-		if ok, _ := c.roll(c.Dup); ok && err == nil {
+		if ok, _ := c.roll(c.Dup, 0); ok && err == nil {
 			err = process(m)
 		}
-		if ok, d := c.roll(c.Redeliver); ok && err == nil {
+		if ok, d := c.roll(c.Redeliver, c.MaxLate); ok && err == nil {
 			late := *m
 			late.Value = append([]byte(nil), m.Value...)
 			go func() { time.Sleep(d); _ = process(&late) }()
