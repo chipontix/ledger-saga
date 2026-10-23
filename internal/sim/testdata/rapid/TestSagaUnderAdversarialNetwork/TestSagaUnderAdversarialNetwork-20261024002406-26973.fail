@@ -1,0 +1,306 @@
+# 2026/10/24 00:24:06.090472 [TestSagaUnderAdversarialNetwork] [rapid] draw accounts: 5
+# 2026/10/24 00:24:06.090487 [TestSagaUnderAdversarialNetwork] [rapid] draw balance: 0
+# 2026/10/24 00:24:06.090488 [TestSagaUnderAdversarialNetwork] [rapid] draw frozen: 0
+# 2026/10/24 00:24:06.090488 [TestSagaUnderAdversarialNetwork] [rapid] draw balance: 12
+# 2026/10/24 00:24:06.090489 [TestSagaUnderAdversarialNetwork] [rapid] draw frozen: 1
+# 2026/10/24 00:24:06.090489 [TestSagaUnderAdversarialNetwork] [rapid] draw balance: 16
+# 2026/10/24 00:24:06.090490 [TestSagaUnderAdversarialNetwork] [rapid] draw frozen: 1
+# 2026/10/24 00:24:06.090490 [TestSagaUnderAdversarialNetwork] [rapid] draw balance: 0
+# 2026/10/24 00:24:06.090490 [TestSagaUnderAdversarialNetwork] [rapid] draw frozen: 0
+# 2026/10/24 00:24:06.090491 [TestSagaUnderAdversarialNetwork] [rapid] draw balance: 0
+# 2026/10/24 00:24:06.090491 [TestSagaUnderAdversarialNetwork] [rapid] draw frozen: 0
+# 2026/10/24 00:24:06.090492 [TestSagaUnderAdversarialNetwork] [rapid] draw transfers: 6
+# 2026/10/24 00:24:06.090492 [TestSagaUnderAdversarialNetwork] [rapid] draw from: 2
+# 2026/10/24 00:24:06.090492 [TestSagaUnderAdversarialNetwork] [rapid] draw to: 1
+# 2026/10/24 00:24:06.090493 [TestSagaUnderAdversarialNetwork] [rapid] draw amount: 1
+# 2026/10/24 00:24:06.090494 [TestSagaUnderAdversarialNetwork] [rapid] draw from: 3
+# 2026/10/24 00:24:06.090494 [TestSagaUnderAdversarialNetwork] [rapid] draw to: 1
+# 2026/10/24 00:24:06.090495 [TestSagaUnderAdversarialNetwork] [rapid] draw amount: 1
+# 2026/10/24 00:24:06.090495 [TestSagaUnderAdversarialNetwork] [rapid] draw from: 1
+# 2026/10/24 00:24:06.090496 [TestSagaUnderAdversarialNetwork] [rapid] draw to: 1
+# 2026/10/24 00:24:06.090496 [TestSagaUnderAdversarialNetwork] [rapid] draw from: 1
+# 2026/10/24 00:24:06.090496 [TestSagaUnderAdversarialNetwork] [rapid] draw to: 2
+# 2026/10/24 00:24:06.090497 [TestSagaUnderAdversarialNetwork] [rapid] draw amount: 1
+# 2026/10/24 00:24:06.090497 [TestSagaUnderAdversarialNetwork] [rapid] draw from: 1
+# 2026/10/24 00:24:06.090498 [TestSagaUnderAdversarialNetwork] [rapid] draw to: 2
+# 2026/10/24 00:24:06.090498 [TestSagaUnderAdversarialNetwork] [rapid] draw amount: 1
+# 2026/10/24 00:24:06.090499 [TestSagaUnderAdversarialNetwork] [rapid] draw from: 1
+# 2026/10/24 00:24:06.090499 [TestSagaUnderAdversarialNetwork] [rapid] draw to: 2
+# 2026/10/24 00:24:06.090499 [TestSagaUnderAdversarialNetwork] [rapid] draw amount: 1
+# 2026/10/24 00:24:06.090500 [TestSagaUnderAdversarialNetwork] [rapid] draw steps: 21
+# 2026/10/24 00:24:06.090500 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090501 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 0
+# 2026/10/24 00:24:06.090501 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090501 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 0
+# 2026/10/24 00:24:06.090501 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090502 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 0
+# 2026/10/24 00:24:06.090502 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090502 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090503 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090503 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090503 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090504 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 2
+# 2026/10/24 00:24:06.090504 [TestSagaUnderAdversarialNetwork] [rapid] draw jump: 1
+# 2026/10/24 00:24:06.090504 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090505 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090505 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090505 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 2
+# 2026/10/24 00:24:06.090505 [TestSagaUnderAdversarialNetwork] [rapid] draw jump: 1221
+# 2026/10/24 00:24:06.090507 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 5
+# 2026/10/24 00:24:06.090507 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090507 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 4
+# 2026/10/24 00:24:06.090508 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 5
+# 2026/10/24 00:24:06.090509 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 0
+# 2026/10/24 00:24:06.090509 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 2
+# 2026/10/24 00:24:06.090509 [TestSagaUnderAdversarialNetwork] [rapid] draw jump: 4411
+# 2026/10/24 00:24:06.090511 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 7
+# 2026/10/24 00:24:06.090511 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 0
+# 2026/10/24 00:24:06.090511 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 3
+# 2026/10/24 00:24:06.090512 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 7
+# 2026/10/24 00:24:06.090512 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 11
+# 2026/10/24 00:24:06.090512 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 2
+# 2026/10/24 00:24:06.090512 [TestSagaUnderAdversarialNetwork] [rapid] draw jump: 3
+# 2026/10/24 00:24:06.090513 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 9
+# 2026/10/24 00:24:06.090513 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 6
+# 2026/10/24 00:24:06.090514 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 3
+# 2026/10/24 00:24:06.090514 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 0
+# 2026/10/24 00:24:06.090514 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 9
+# 2026/10/24 00:24:06.090514 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 5
+# 2026/10/24 00:24:06.090515 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 3
+# 2026/10/24 00:24:06.090515 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090515 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 1
+# 2026/10/24 00:24:06.090516 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090516 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 2
+# 2026/10/24 00:24:06.090516 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 1
+# 2026/10/24 00:24:06.090516 [TestSagaUnderAdversarialNetwork] [rapid] draw msg: 8
+# 2026/10/24 00:24:06.090517 [TestSagaUnderAdversarialNetwork] [rapid] draw action: 3
+# 
+v0.4.8#5988405890818472445
+0x0
+0x38e38e38e38e4
+0x3
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0xc05c654ab866b
+0xc
+0x0
+0x38e38e38e38e4
+0x1
+0x0
+0xc05c654ab866b
+0x10
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x6b74f03291620
+0x5
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x38e38e38e38e4
+0x2
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x38e38e38e38e4
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x6b74f03291620
+0x1
+0x0
+0x0
+0x0
+0x0
+0x103721724ea319
+0x15
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x38e38e38e38e4
+0x2
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x1
+0x0
+0x0
+0x0
+0x0
+0x38e38e38e38e4
+0x2
+0x0
+0x16502e2e6c40bf
+0x4c4
+0x199b61364d6c91
+0x1aa546ec965d08
+0x5
+0x123b9c6ebf9818
+0x2fd3039d6d5c3
+0x1
+0x1fce6bf99f7b5d
+0x1d99df3853642c
+0x4
+0x19e5390caaa20d
+0x1ed8af364a4a53
+0x5
+0x1a3f3a3e72d539
+0x2cc65ae7222dd
+0x0
+0x154da8b1a1d6b0
+0x60b92979a964d
+0x2
+0x1f4917d6cbb52f
+0x1d8b6667253a73
+0x113a
+0x14149a62d3d84b
+0x1767e8773ce348
+0x7
+0x19f14543ff83fc
+0x93b26ac44054e
+0x0
+0x1ed0bd7d53089
+0x556c6383d6403
+0x3
+0x1edbf937bc3722
+0xb25a2bebf3f75
+0x7
+0xb0dca925bcccc
+0x1f8286943f21d3
+0xffffffffffffffff
+0x444e796573573
+0x7d257a29896d8
+0x2
+0x2db488026236e
+0x6ff1a90af65f2
+0x2
+0x1f100b9dcc1542
+0x1df786921a0fd3
+0x9
+0xf4165d8561a4a
+0xf12c2f321dd96
+0x6
+0x15e80e6db36f5c
+0x128cc2dc120551
+0x3
+0x169f4c4fca48d1
+0x17cf11f2bb6bff
+0x0
+0x1e202ced8f6a96
+0x1499baae02f1b8
+0x9
+0x8fb58bedf0e0d
+0x13c344b1b31afe
+0x5
+0x1a696afeb1f7b7
+0x1a00799c375d74
+0x3
+0x1f8c234639bb9d
+0x802426215ac3a
+0x1
+0x194065532e836f
+0x582f45fabfd3
+0x1
+0x1a21f8fece0cb8
+0x3ea15a20cb207
+0x1
+0x1c95019b646d6
+0x18520438a55e00
+0x2
+0x15fbfa53985ea5
+0x1c972c05028163
+0x1
+0x13dbdda8330518
+0x18009366831e37
+0x8
+0xc82954d02a7f5
+0x51fde46465ee5
+0x3
