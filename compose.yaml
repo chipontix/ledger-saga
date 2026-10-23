@@ -90,7 +90,8 @@ services:
   migrate:
     <<: *app
     restart: "no"
-    command: ["sh", "-c", "ledgersaga migrate && ledgersaga seed -accounts ${ACCOUNTS:-10000}"]
+    entrypoint: ["sh", "-c"]
+    command: ["ledgersaga migrate && ledgersaga seed -accounts ${ACCOUNTS:-10000}"]
     depends_on:
       postgres: {condition: service_healthy}
       kafka: {condition: service_healthy}

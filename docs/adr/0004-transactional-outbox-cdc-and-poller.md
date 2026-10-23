@@ -50,7 +50,38 @@ purpose.
 
 ## Measurements
 
-See "CDC vs poller" in the README; numbers come from `make bench` runs on
-the hardware listed there.
+`scripts/bench.sh`, closed-loop clients (each creates a transfer and
+long-polls it to a terminal state), 4 vCPU / 4 GiB colima VM on a shared
+laptop, services at commit `66ee2b6`. Two passes: A (first) and B (with
+Prometheus delivery quantiles and per-container CPU). Raw files in
+`results/bench/`.
+
+| | CDC | poller |
+|---|---|---|
+| 100 clients, sagas/s (A / B) | 768 / 624 | 624† / 615 |
+| 100 clients, saga p99 (A / B) | 200 / 439 ms | 490† / 357 ms |
+| outbox → ledger consumer, p50 / p99 (B, 100 clients) | 21 / 85 ms | 23 / 73 ms |
+| outbox → orchestrator consumer, p50 / p99 (B, 100 clients) | 16 / 68 ms | 16 / 62 ms |
+| Postgres CPU at 100 clients (B, 1.0 = one core) | 1.09 | 1.11 |
+| 1000 clients, sagas/s (A / B) | 824 / 742 | 825 / 447† |
+| added DB transactions per second at idle | ~1 | ~178 |
+
+† the run contains multi-second gaps with (almost) no completions. In pass
+B, where `vmstat` was recorded inside the VM, 11 of the 13 gap seconds show
+46–98% iowait with block writes near zero: the VM's disk stalled while the
+host was swapping. Pass A had no `vmstat`; its gaps look the same (4 s, no
+error in any service log). They are in the numbers, not filtered out.
+
+Reading: under load the relay is not the bottleneck and the two are within
+run-to-run noise here; at 1000 clients both saturate at the same ~800
+sagas/s because commands queue in front of the ledger consumer (B, CDC:
+command delivery p50 364 ms against 21 ms for replies), with Postgres at
+about 1.2 of 4 cores. The difference that does show is cost at rest: the
+poller issues ~178 empty transactions a second for two tables at a 10 ms
+interval, forever, per instance; CDC costs a walsender and the slot-retention
+risk instead.
+
+Default is CDC (`RELAY_MODE=cdc` in compose). The poller stays for databases
+where logical replication is not available.
 
 [go-pq-cdc-kafka]: https://github.com/Trendyol/go-pq-cdc-kafka

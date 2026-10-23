@@ -1,0 +1,12 @@
+{
+  "states": {
+    "COMPLETED": 30421,
+    "REFUNDED": 593,
+    "REJECTED": 651
+  },
+  "operations": 94286,
+  "in_flight": 0,
+  "violations": null,
+  "quiescent": true,
+  "customer_sum": 10000000000
+}

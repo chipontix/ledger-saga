@@ -1,0 +1,5 @@
+cdc-c100 c=100: 768 sagas/s, p50 126.9ms p99 200.5ms max 356.8ms, POST p99 11.8ms, map[COMPLETED:44245 REFUNDED:862 REJECTED:978], 0 client retries
+cdc-c1000 c=1000: 824 sagas/s, p50 1118.8ms p99 2649.7ms max 4360.9ms, POST p99 15.3ms, map[COMPLETED:47425 REFUNDED:998 REJECTED:1037], 0 client retries
+poll-c100 c=100: 624 sagas/s, p50 117.7ms p99 489.9ms max 5083.3ms, POST p99 38.6ms, map[COMPLETED:35993 REFUNDED:753 REJECTED:707], 0 client retries
+poll-c1000 c=1000: 825 sagas/s, p50 1091.8ms p99 2907.5ms max 4859.6ms, POST p99 14.7ms, map[COMPLETED:47550 REFUNDED:962 REJECTED:1002], 0 client retries
+recovery-ledger c=100: 520 sagas/s, p50 124.0ms p99 821.5ms max 11131.4ms, POST p99 26.4ms, map[COMPLETED:39922 REFUNDED:793 REJECTED:882], 0 client retries

@@ -1,0 +1,6 @@
+Idle database load, 20 s windows, no traffic, pg_stat_database xact_commit+xact_rollback on db 'ledger'
+(measured 2026-10-24 ~02:07 +03, same VM as the load runs)
+
+no relay (orchestrator timeout sweeper only, every 100 ms): 9-10 tx/s
+poll relay, POLL_INTERVAL=10ms, two outbox tables:          188 tx/s
+cdc relay (go-pq-cdc-kafka):                                11 tx/s
