@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 2s
+scrape_configs:
+  - job_name: ledger-saga
+    static_configs:
+      - targets: ["orchestrator:9100", "ledger:9100", "relay:9100"]
+  - job_name: cdc-connector
+    static_configs:
+      - targets: ["relay:9101"]

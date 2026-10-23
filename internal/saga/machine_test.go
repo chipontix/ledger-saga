@@ -11,7 +11,7 @@ import (
 
 var t0 = time.Unix(1_700_000_000, 0)
 
-func reply(tr Transfer, step wire.Step, o wire.Outcome) wire.Reply {
+func replyFor(tr Transfer, step wire.Step, o wire.Outcome) wire.Reply {
 	return wire.Reply{SagaID: tr.ID, Step: step, Outcome: o, Reason: "r"}
 }
 
@@ -35,12 +35,12 @@ func TestHappyPathAndRefund(t *testing.T) {
 	for _, s := range steps {
 		var c *wire.Command
 		var ok bool
-		tr, c, ok = OnReply(tr, reply(tr, s.step, s.outcome), t0, p)
+		tr, c, ok = OnReply(tr, replyFor(tr, s.step, s.outcome), t0, p)
 		if !ok || tr.State != s.want || c.Step != s.next || c.Account != s.account || c.Attempt != 1 {
 			t.Fatalf("after %s/%s: state %s cmd %+v", s.step, s.outcome, tr.State, c)
 		}
 	}
-	tr, c, ok := OnReply(tr, reply(tr, wire.Refund, wire.OK), t0, p)
+	tr, c, ok := OnReply(tr, replyFor(tr, wire.Refund, wire.OK), t0, p)
 	if !ok || tr.State != Refunded || c != nil || tr.Reason != "r" {
 		t.Fatalf("refund: %s %v", tr.State, c)
 	}
@@ -49,14 +49,14 @@ func TestHappyPathAndRefund(t *testing.T) {
 func TestStaleRepliesAreIgnored(t *testing.T) {
 	p := DefaultPolicy()
 	tr, _ := Start(Transfer{ID: uuid.New(), From: 1, To: 2, Amount: 10}, t0, p)
-	tr, _, _ = OnReply(tr, reply(tr, wire.Hold, wire.OK), t0, p)
-	for _, r := range []wire.Reply{reply(tr, wire.Hold, wire.OK), reply(tr, wire.Hold, wire.Rejected), reply(tr, wire.Credit, wire.OK)} {
+	tr, _, _ = OnReply(tr, replyFor(tr, wire.Hold, wire.OK), t0, p)
+	for _, r := range []wire.Reply{replyFor(tr, wire.Hold, wire.OK), replyFor(tr, wire.Hold, wire.Rejected), replyFor(tr, wire.Credit, wire.OK)} {
 		if _, _, ok := OnReply(tr, r, t0, p); ok {
 			t.Fatalf("stale %s/%s applied in %s", r.Step, r.Outcome, tr.State)
 		}
 	}
 	// A refused capture is a bug on the ledger side; the saga must not move.
-	if _, _, ok := OnReply(tr, reply(tr, wire.Capture, wire.Rejected), t0, p); ok {
+	if _, _, ok := OnReply(tr, replyFor(tr, wire.Capture, wire.Rejected), t0, p); ok {
 		t.Fatal("refused capture moved the saga")
 	}
 }

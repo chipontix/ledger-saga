@@ -1,0 +1,108 @@
+# Infra (postgres, kafka, prometheus, grafana) starts by default.
+# The services start with `--profile app` (see Makefile).
+x-app: &app
+  build: .
+  image: ledger-saga:local
+  restart: unless-stopped
+  environment: &app-env
+    PG_URL: postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable
+    KAFKA_BROKERS: kafka:29092
+    RELAY_MODE: ${RELAY_MODE:-cdc}
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+  profiles: [app]
+
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=64
+      - -c
+      - max_wal_senders=64
+      - -c
+      - max_connections=400
+      - -c
+      - shared_buffers=1GB
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ledger
+    ports: ["${PG_PORT:-5432}:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 1s
+      retries: 30
+
+  kafka:
+    image: apache/kafka:3.9.1
+    ports: ["${KAFKA_PORT:-9092}:9092"]
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:${KAFKA_PORT:-9092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 8
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      # A killed consumer's partitions are reassigned after its session
+      # times out; the broker default floor (6s) is the client's floor too.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 2s
+      retries: 30
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-lifecycle"]
+    volumes: ["./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["${PROMETHEUS_PORT:-9090}:9090"]
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["${GRAFANA_PORT:-3000}:3000"]
+
+  migrate:
+    <<: *app
+    restart: "no"
+    command: ["sh", "-c", "ledgersaga migrate && ledgersaga seed -accounts ${ACCOUNTS:-10000}"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+
+  orchestrator:
+    <<: *app
+    command: ["orchestrator"]
+    ports: ["${API_PORT:-8080}:8080"]
+
+  ledger:
+    <<: *app
+    command: ["ledger"]
+
+  relay:
+    <<: *app
+    command: ["relay"]
+
+  load:
+    <<: *app
+    restart: "no"
+    command: ["load"]
+    depends_on: {}
+    profiles: [load]
