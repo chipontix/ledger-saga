@@ -282,6 +282,95 @@
      "placement": "bottom"
     }
    }
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "Stuck sagas (open longer than STUCK_AFTER), by state",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 24,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "max by (state) (saga_stuck)",
+     "legendFormat": "{{state}}",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prom"
+     }
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    }
+   }
+  },
+  {
+   "id": 9,
+   "type": "timeseries",
+   "title": "Oldest open saga",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 32,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "max(saga_oldest_open_seconds)",
+     "legendFormat": "age",
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prom"
+     }
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s"
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    }
+   }
   }
  ]
 }

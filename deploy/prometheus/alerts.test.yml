@@ -1,0 +1,42 @@
+# promtool test rules alerts.test.yml (CI runs it)
+rule_files: [alerts.yml]
+evaluation_interval: 15s
+
+tests:
+  - interval: 15s
+    input_series:
+      # stuck from t=30s; a second replica reports the same count
+      - series: 'saga_stuck{instance="orchestrator:9100",state="CREDIT_PENDING"}'
+        values: "0 0 1 1 1 1 1 1 1 1"
+      - series: 'saga_stuck{instance="orchestrator-2:9100",state="CREDIT_PENDING"}'
+        values: "0 0 1 1 1 1 1 1 1 1"
+      - series: 'saga_stuck{instance="orchestrator:9100",state="HOLD_PENDING"}'
+        values: "0x9"
+      - series: 'saga_oldest_open_seconds{instance="orchestrator:9100"}'
+        values: "0 0 61 76 91 106 121 136 151 166"
+    alert_rule_test:
+      - eval_time: 75s # pending: stuck for 45s, not yet 1m
+        alertname: SagaStuck
+        exp_alerts: []
+      - eval_time: 90s
+        alertname: SagaStuck
+        exp_alerts:
+          - exp_labels: {severity: page, state: CREDIT_PENDING}
+            exp_annotations:
+              summary: "1 transfer(s) stuck in CREDIT_PENDING"
+              description: "Open for more than STUCK_AFTER. Steps after hold retry forever; look at the ledger consumer lag, its DLQ, and GET /transfers/{id} for the attempt count."
+      - eval_time: 90s
+        alertname: SagaStuckDetectorAbsent
+        exp_alerts: []
+
+  - interval: 15s
+    input_series:
+      - series: 'up{job="ledger-saga"}'
+        values: "1x12"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: SagaStuckDetectorAbsent
+        exp_alerts:
+          - exp_labels: {severity: page}
+            exp_annotations:
+              summary: "No orchestrator is reporting saga_oldest_open_seconds"

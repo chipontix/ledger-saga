@@ -24,6 +24,8 @@ import (
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/network"
 
@@ -453,4 +455,58 @@ func TestAuditCatchesCrossCurrencyPosting(t *testing.T) {
 	if !cross || !usd || !eur {
 		t.Fatalf("violations %q: want the cross-currency leg and both currencies out of balance", rep.Violations)
 	}
+}
+
+// A saga that cannot move is counted once it is older than the threshold,
+// and a finished one is not. With no relay, nothing is ever delivered: the
+// sweeper retries hold, then moves to RELEASE_PENDING and waits forever.
+func TestStuckSagasAreCounted(t *testing.T) {
+	ctx := context.Background()
+	s := newSystem(t, "none", 8, saga.Policy{StepTimeout: 100 * time.Millisecond, MaxBackoff: time.Second, HoldAttempts: 2})
+	past := &saga.Store{DB: s.pool, Policy: saga.DefaultPolicy(), Commands: s.commands,
+		Now: func() time.Time { return time.Now().Add(-2 * time.Minute) }}
+	for i := range 2 {
+		if _, _, err := past.Create(ctx, fmt.Sprintf("old-%d", i), saga.Request{From: 1, To: 2, Amount: 1, Currency: "USD"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if code, _ := s.post("fresh", 1, 2, 1); code != http.StatusCreated {
+		t.Fatalf("POST: %d", code)
+	}
+	if _, err := s.pool.Exec(ctx, `UPDATE saga.transfers SET state = 'COMPLETED', finished_at = now()
+		WHERE idem_key = 'old-1'`); err != nil {
+		t.Fatal(err)
+	}
+	now := &saga.Store{DB: s.pool, Now: time.Now}
+	stuck, oldest, err := now.Stuck(ctx, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	total := 0
+	for _, n := range stuck {
+		total += n
+	}
+	if total != 1 || oldest < 2*time.Minute-5*time.Second {
+		t.Fatalf("stuck %v, oldest %v: want one stuck, about 2m old", stuck, oldest)
+	}
+	if g := gauges(t); g["saga_stuck"] != 1 || g["saga_oldest_open_seconds"] != oldest.Seconds() {
+		t.Fatalf("exported %v, want saga_stuck 1 and the oldest age", g)
+	}
+}
+
+// gauges sums each saga_* gauge over its labels, as exported.
+func gauges(t *testing.T) map[string]float64 {
+	mfs, err := prometheus.DefaultGatherer.Gather()
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := map[string]float64{}
+	for _, mf := range mfs {
+		for _, m := range mf.GetMetric() {
+			if g := m.GetGauge(); g != nil && strings.HasPrefix(mf.GetName(), "saga_") {
+				out[mf.GetName()] += g.GetValue()
+			}
+		}
+	}
+	return out
 }

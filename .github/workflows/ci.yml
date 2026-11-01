@@ -16,6 +16,10 @@ jobs:
       - run: go vet ./... && go vet -tags integration ./...
       - name: unit + property tests, race detector
         run: go test -race -count=1 ./...
+      - name: Prometheus config and alert rules
+        run: |
+          docker run --rm -v "$PWD/deploy/prometheus:/p:ro" -w /p --entrypoint promtool prom/prometheus:v3.5.0 check config prometheus.yml
+          docker run --rm -v "$PWD/deploy/prometheus:/p:ro" -w /p --entrypoint promtool prom/prometheus:v3.5.0 test rules alerts.test.yml
 
   integration:
     runs-on: ubuntu-latest

@@ -72,7 +72,9 @@ services:
     image: prom/prometheus:v3.5.0
     mem_limit: 384m
     command: ["--config.file=/etc/prometheus/prometheus.yml", "--web.enable-lifecycle"]
-    volumes: ["./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
     ports: ["${PROMETHEUS_PORT:-9090}:9090"]
 
   grafana:

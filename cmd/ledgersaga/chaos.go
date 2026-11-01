@@ -215,6 +215,7 @@ func (h *harness) do(ctx context.Context, name string) error {
 		"PG_URL=" + u.String(), "TOPIC_PREFIX=" + name + "." + stamp + ".", "PARTITIONS=4", "PG_MAX_CONNS=8",
 		"STEP_TIMEOUT=1s", "HOLD_ATTEMPTS=2", "MAX_BACKOFF=4s", "SWEEP_EVERY=50ms", "RETRY_EVERY=@every 5s", "RETRY_WORK=1s",
 		"CONSUMER_CONCURRENCY=8", "TIMEOUT_GRACE=7s", // grace must cover the 6s group session timeout
+		"STUCK_EVERY=1s",
 		"RELAY_MODE=" + h.Relay, "CDC_SLOT=" + name, "CDC_TICK=5ms",
 		"CDC_METRICS_PORT=" + strconv.Itoa(base+4),
 		"CHAOS_SEED=" + strconv.Itoa(h.Seed), "CHAOS_DEFER=0.10", "CHAOS_DUP=0.05", "CHAOS_DELAY=0.02", "CHAOS_MAX_DELAY=200ms",
@@ -286,6 +287,11 @@ func (h *harness) do(ctx context.Context, name string) error {
 	}
 	if n != h.Keys {
 		h.problem("%d transfers for %d idempotency keys", n, h.Keys)
+	}
+	// The stuck-saga detector of the (possibly restarted) orchestrator must
+	// be reporting, and report nothing open once everything is terminal.
+	if age, ok := gauge(fmt.Sprintf("http://localhost:%d/metrics", base+1), "saga_oldest_open_seconds"); !ok || age != 0 {
+		h.problem("at rest saga_oldest_open_seconds = %v (exported %v), want 0", age, ok)
 	}
 	h.Absorbed = map[string]float64{}
 	for i, port := range []int{base + 1, base + 2} {
@@ -453,6 +459,22 @@ func scrape(u string) map[string]float64 {
 		out[res] += v
 	}
 	return out
+}
+
+func gauge(u, name string) (float64, bool) {
+	resp, err := http.Get(u)
+	if err != nil {
+		return 0, false
+	}
+	defer resp.Body.Close()
+	sc := bufio.NewScanner(resp.Body)
+	for sc.Scan() {
+		if v, ok := strings.CutPrefix(sc.Text(), name+" "); ok {
+			f, err := strconv.ParseFloat(v, 64)
+			return f, err == nil
+		}
+	}
+	return 0, false
 }
 
 func waitHTTP(ctx context.Context, u string, d time.Duration) error {
@@ -671,6 +693,7 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		"and every operation in its saga's; per currency, nothing in clearing at rest and customer money equals the opening total; " +
 		"nothing held at rest; every saga terminal with exactly the ledger operations its state " +
 		"allows and exactly -amount/+amount moved (completed) or nothing; every transition log is a legal path ending in the " +
-		"saga's state; one transfer per idempotency key, and a re-sent key returns the same transfer.\n")
+		"saga's state; one transfer per idempotency key, and a re-sent key returns the same transfer; the orchestrator's " +
+		"stuck-saga gauge is exported and reads 0.\n")
 	return b.String()
 }

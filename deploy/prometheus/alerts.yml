@@ -1,0 +1,24 @@
+groups:
+  - name: ledger-saga
+    rules:
+      # saga_stuck counts open transfers accepted more than STUCK_AFTER (60s)
+      # ago. A healthy saga finishes in under a second, and hold gives up after
+      # three attempts (~15s), so anything older is an outage or a bug. Every
+      # orchestrator replica reads the same table, hence max, not sum.
+      - alert: SagaStuck
+        expr: max by (state) (saga_stuck) > 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: "{{ $value }} transfer(s) stuck in {{ $labels.state }}"
+          description: "Open for more than STUCK_AFTER. Steps after hold retry forever; look at the ledger consumer lag, its DLQ, and GET /transfers/{id} for the attempt count."
+
+      # Without this, a dead orchestrator or a failing query silences SagaStuck.
+      - alert: SagaStuckDetectorAbsent
+        expr: absent(saga_oldest_open_seconds)
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          summary: "No orchestrator is reporting saga_oldest_open_seconds"
