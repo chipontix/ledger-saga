@@ -1,7 +1,8 @@
 # ledger-saga
 
 Money transfers between sharded ledger accounts as an orchestrated saga
-(hold → capture → credit, refund and release as compensations), with a
+(hold → capture → credit, refund and release as compensations), in several
+currencies without conversion, with a
 transactional outbox shipped to Kafka by CDC or by a poller, three layers of
 idempotency, and a crash harness that SIGKILLs a real process at every step
 boundary and then audits the books.
@@ -13,6 +14,8 @@ boundary and then audits the books.
 | Money is conserved and nothing is applied twice, under any delivery order, duplication or loss | property test: rapid drives the real state machine and ledger decision function through adversarial schedules (`internal/sim`) |
 | …and under real crashes | [crash matrix](docs/chaos-matrix.md): 11 crash points × 5 seeds + 5 no-crash baselines = **60/60 runs pass**, 12,062 transfers, 55 SIGKILLs, with duplicates, reordering and late redelivery injected on every run |
 | …and under load | every benchmark run ends with the same audit: **292,204 sagas over 7 runs, 0 violations** |
+| Money never crosses currencies | the property test draws account currencies and lets clients name the wrong one; removing the currency check from either hold or credit fails on the first schedule. Every chaos run seeds USD and EUR accounts, and the audit checks conservation per currency and that every leg is in its account's currency. A forged operation that balances but pays EUR into a USD account is reported ([ADR-0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md)) |
+| A stuck saga pages someone | `saga_stuck{state}` and `saga_oldest_open_seconds` from the orchestrator, with the `SagaStuck` and `SagaStuckDetectorAbsent` alerts tested by `promtool test rules` in CI. An integration test shows an undeliverable saga being counted. Every chaos run requires the restarted orchestrator to export the gauge and read 0 at rest ([ADR-0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md)) |
 | The harness can see a bug | removing the one `if` that fences a late hold makes 6 of 8 runs fail; the harness had to be changed before it could see it ([ADR-0007](docs/adr/0007-crash-harness-real-processes-sigkill-at-named-points.md)) |
 | No data races | `go test -race` on every package, unit and integration; one seed of the crash matrix on race-enabled binaries of all three services: 12/12 runs, 0 race reports (CI repeats this on every push) |
 | Each idempotency layer holds on its own boundary | Testcontainers tests on Postgres 17 + Kafka 3.9: 32 concurrent POSTs with one key create one transfer; a poison message goes to the DLQ and the partition moves on; a retried hold replays the original refusal after the account is topped up |
@@ -86,9 +89,11 @@ flowchart LR
   with inbox dedup, in-process backoff, a retry topic and a dead-letter topic.
 
 States: `HOLD_PENDING → CAPTURE_PENDING → CREDIT_PENDING → COMPLETED`;
-`HOLD_PENDING → REJECTED` (insufficient funds, frozen source);
+`HOLD_PENDING → REJECTED` (insufficient funds, frozen source, source not in
+the transfer's currency);
 `HOLD_PENDING → RELEASE_PENDING → CANCELLED` (hold timed out);
-`CREDIT_PENDING → REFUND_PENDING → REFUNDED` (destination frozen or missing).
+`CREDIT_PENDING → REFUND_PENDING → REFUNDED` (destination frozen, missing or
+in another currency).
 
 ## Decisions
 
@@ -101,6 +106,8 @@ States: `HOLD_PENDING → CAPTURE_PENDING → CREDIT_PENDING → COMPLETED`;
 | [0005](docs/adr/0005-three-layers-of-idempotency.md) | Idempotency: API key, inbox, natural key with replay |
 | [0006](docs/adr/0006-retry-ladder-and-dead-letter.md) | Retry ladder and DLQ; kafka-konsumer settings that must not be left at default |
 | [0007](docs/adr/0007-crash-harness-real-processes-sigkill-at-named-points.md) | Crash harness; how it was itself tested; what it found |
+| [0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md) | Currencies: the client names one, the ledger checks it at hold and credit, no conversion; per-currency invariants |
+| [0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md) | Stuck sagas: a periodic gauge, an alert, and an alert on the detector's absence |
 
 ## Reproduce
 
@@ -111,7 +118,7 @@ make test              # unit + property tests with -race
 make test-integration  # Testcontainers: Postgres 17 + Kafka 3.9
 make chaos             # crash matrix, rewrites docs/chaos-matrix.md
 make bench             # load + recovery, writes results/bench/
-make up                # the stack; Grafana on :3000, Prometheus on :9090, API on :8080
+make up                # the stack; Grafana on :3000, Prometheus (with alerts) on :9090, API on :8080
 ```
 
 Host ports are overridable (`PG_PORT`, `KAFKA_PORT`, `API_PORT`,
@@ -133,5 +140,13 @@ internal/check/   invariant audit
 internal/consumer kafka-konsumer wiring, retry ladder, chaos injection
 internal/relay/   outbox → Kafka: CDC and poller
 internal/it/      Testcontainers integration tests
-deploy/           Prometheus and Grafana provisioning
+deploy/           Prometheus config and alert rules (with promtool tests), Grafana provisioning
 ```
+
+## How it was built
+
+The code, tests and documentation in this repository were written by the AI
+agent Claude Code (Anthropic), from Rabiya's problem statement and under her
+direction. The claims above do not depend on taking that on trust: each one
+names the test, run or file that checks it, and the commands in
+[Reproduce](#reproduce) rerun them.
