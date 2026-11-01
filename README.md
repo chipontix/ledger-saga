@@ -118,7 +118,7 @@ Host ports are overridable (`PG_PORT`, `KAFKA_PORT`, `API_PORT`,
 `GRAFANA_PORT`, `PROMETHEUS_PORT` in `.env`) when the defaults are taken.
 
 ```bash
-curl -s -XPOST localhost:8080/transfers -H 'Idempotency-Key: k1' -d '{"from":1,"to":2,"amount":100}'
+curl -s -XPOST localhost:8080/transfers -H 'Idempotency-Key: k1' -d '{"from":1,"to":2,"amount":100,"currency":"USD"}'
 curl -s 'localhost:8080/transfers/<id>?wait=5s'
 ```
 

@@ -47,3 +47,6 @@ whole shard on one lock.
   not yet credited or refunded.
 - Balances are a cache of the journal; a bug in the cache is caught by
   invariant 2 rather than silently trusted.
+- Amounts are per currency since [ADR-0008](0008-currencies-checked-by-the-ledger-no-conversion.md):
+  an operation has one currency, its legs inherit it, and invariants 1 and
+  4 hold for each currency separately.

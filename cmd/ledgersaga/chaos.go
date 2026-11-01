@@ -34,6 +34,7 @@ import (
 	"github.com/chipontix/ledger-saga/internal/check"
 	"github.com/chipontix/ledger-saga/internal/db"
 	"github.com/chipontix/ledger-saga/internal/failpoint"
+	"github.com/chipontix/ledger-saga/internal/ledger"
 	"github.com/chipontix/ledger-saga/internal/saga"
 )
 
@@ -219,7 +220,8 @@ func (h *harness) do(ctx context.Context, name string) error {
 		"CHAOS_SEED=" + strconv.Itoa(h.Seed), "CHAOS_DEFER=0.10", "CHAOS_DUP=0.05", "CHAOS_DELAY=0.02", "CHAOS_MAX_DELAY=200ms",
 		"CHAOS_REDELIVER=0.05", "CHAOS_MAX_LATE=1500ms",
 	}
-	for _, step := range [][]string{{"migrate"}, {"seed", "-accounts", strconv.Itoa(h.accounts), "-balance", "1000", "-frozen-every", "10"}} {
+	for _, step := range [][]string{{"migrate"}, {"seed", "-accounts", strconv.Itoa(h.accounts), "-balance", "1000", "-frozen-every", "10",
+		"-currencies", strings.Join(chaosCurrencies, ",")}} {
 		cmd := exec.CommandContext(ctx, h.bin, step...)
 		cmd.Env = append(os.Environ(), envs...)
 		if out, err := cmd.CombinedOutput(); err != nil {
@@ -294,6 +296,9 @@ func (h *harness) do(ctx context.Context, name string) error {
 	return nil
 }
 
+// chaosCurrencies are the currencies of a chaos run's accounts.
+var chaosCurrencies = []string{"USD", "EUR"}
+
 // workload sends the seeded transfers through the API. Every POST is retried
 // with its key until it gets an answer, the way a client riding out an API
 // crash would; one in ten is re-sent after success and must get the same id.
@@ -312,11 +317,22 @@ func (h *harness) workload(ctx context.Context, api string) {
 			<-pace.C
 			from := 1 + rng.IntN(h.accounts)
 			to := 1 + rng.IntN(h.accounts+1) // accounts+1 does not exist
+			cur := func(id int) string { return ledger.SeedCurrency(int64(id), chaosCurrencies) }
+			// Three in four cross-currency pairs are redrawn, so most transfers
+			// can complete; about one in five still crosses and must refund.
+			for to <= h.accounts && cur(to) != cur(from) && rng.IntN(4) != 0 {
+				to = 1 + rng.IntN(h.accounts)
+			}
 			if to == from {
 				to = from%h.accounts + 1
 			}
+			currency := cur(from)
+			if rng.IntN(20) == 0 { // the client names the wrong currency: hold refuses
+				currency = cur(from + ledger.Shards)
+			}
 			jobs <- job{fmt.Sprintf("seed%d-%d", h.Seed, i),
-				fmt.Sprintf(`{"from":%d,"to":%d,"amount":%d}`, from, to, 1+rng.IntN(400)), rng.IntN(10) == 0}
+				fmt.Sprintf(`{"from":%d,"to":%d,"amount":%d,"currency":%q}`, from, to, 1+rng.IntN(400), currency),
+				rng.IntN(10) == 0}
 		}
 	}()
 	client := &http.Client{Timeout: 5 * time.Second}
@@ -354,7 +370,7 @@ func warmup(ctx context.Context, api string) (int, error) {
 	c := &http.Client{Timeout: 35 * time.Second}
 	deadline := time.Now().Add(60 * time.Second)
 	for i := 0; time.Now().Before(deadline); i++ {
-		id, err := post(ctx, c, api, fmt.Sprintf("warmup-%d", i), `{"from":1,"to":2,"amount":1}`)
+		id, err := post(ctx, c, api, fmt.Sprintf("warmup-%d", i), `{"from":1,"to":2,"amount":1,"currency":"USD"}`)
 		if err != nil {
 			return i + 1, err
 		}
@@ -615,7 +631,8 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		time.Now().UTC().Format("2006-01-02 15:04 UTC"), took.Round(time.Second))
 	fmt.Fprintf(&b, "**%d/%d runs passed** · %d transfers · %d SIGKILLs · every run with 10%% of saga steps having all their first deliveries "+
 		"deferred through the retry topic (so later messages overtake them), 5%% duplicated, 2%% delayed inside the batch and 5%% "+
-		"redelivered up to 1.5s late, on both consumers.\n\n", pass, len(runs), keys, kills)
+		"redelivered up to 1.5s late, on both consumers. Accounts are in %s; some transfers name the wrong currency "+
+		"or cross currencies and must be refused or refunded.\n\n", pass, len(runs), keys, kills, strings.Join(chaosCurrencies, " and "))
 	fmt.Fprintf(&b, "Terminal states over all runs: %v.\n\n", states)
 	fmt.Fprintf(&b, "Absorbed by the consumers that were alive at the end of each run (killed processes lose their counters): "+
 		"orchestrator %v duplicate / %v stale replies, ledger %v duplicate / %v replayed commands; %v first deliveries "+
@@ -650,8 +667,9 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 			r.States[saga.Cancelled], r.Quiesce.Seconds(), strings.Join(r.Problems, "<br>"))
 	}
 	b.WriteString("\nInvariants checked after every run (`internal/check`): journal sums to zero globally and per operation; " +
-		"balance rows equal the journal; no negative balance; no operation crosses a shard; nothing held and clearing at zero " +
-		"at rest; customer money equals the opening total; every saga terminal with exactly the ledger operations its state " +
+		"balance rows equal the journal; no negative balance; no operation crosses a shard; every leg is in its account's currency " +
+		"and every operation in its saga's; per currency, nothing in clearing at rest and customer money equals the opening total; " +
+		"nothing held at rest; every saga terminal with exactly the ledger operations its state " +
 		"allows and exactly -amount/+amount moved (completed) or nothing; every transition log is a legal path ending in the " +
 		"saga's state; one transfer per idempotency key, and a re-sent key returns the same transfer.\n")
 	return b.String()

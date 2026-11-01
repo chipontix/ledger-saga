@@ -30,4 +30,4 @@ bench:                ## load at 100/1000 clients for both relays + crash recove
 	./scripts/bench.sh
 
 demo: up              ## one transfer end to end
-	curl -s -XPOST localhost:$${API_PORT:-8080}/transfers -H 'Idempotency-Key: demo-1' -d '{"from":1,"to":2,"amount":100}'
+	curl -s -XPOST localhost:$${API_PORT:-8080}/transfers -H 'Idempotency-Key: demo-1' -d '{"from":1,"to":2,"amount":100,"currency":"USD"}'

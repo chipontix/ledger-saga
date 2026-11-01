@@ -23,9 +23,12 @@ type opKey struct {
 }
 
 type posted struct {
-	saga uuid.UUID
+	saga     uuid.UUID
+	currency string // the operation's
 	ledger.Entry
 }
+
+var currencies = []string{"USD", "EUR"}
 
 type world struct {
 	t        *rapid.T
@@ -39,7 +42,7 @@ type world struct {
 	orchSeen map[string]bool
 	ledgSeen map[string]bool
 	inflight []any
-	initial  int64
+	initial  map[string]int64
 }
 
 func newWorld(t *rapid.T) *world {
@@ -52,16 +55,18 @@ func newWorld(t *rapid.T) *world {
 		ops:      map[opKey]ledger.Decision{},
 		orchSeen: map[string]bool{},
 		ledgSeen: map[string]bool{},
+		initial:  map[string]int64{},
 	}
 	n := rapid.IntRange(2, 6).Draw(t, "accounts")
 	for id := int64(1); id <= int64(n); id++ {
 		bal := rapid.Int64Range(0, 100).Draw(t, "balance")
-		w.accounts[id] = &ledger.Account{ID: id, Exists: true, Available: bal,
+		cur := rapid.SampledFrom(currencies).Draw(t, "currency")
+		w.accounts[id] = &ledger.Account{ID: id, Exists: true, Available: bal, Currency: cur,
 			Frozen: rapid.IntRange(0, 4).Draw(t, "frozen") == 0}
 		w.journal = append(w.journal,
-			posted{Entry: ledger.Entry{Account: ledger.Equity, Bucket: ledger.Available, Amount: -bal}},
-			posted{Entry: ledger.Entry{Account: id, Bucket: ledger.Available, Amount: bal}})
-		w.initial += bal
+			posted{currency: cur, Entry: ledger.Entry{Account: ledger.Equity, Bucket: ledger.Available, Amount: -bal}},
+			posted{currency: cur, Entry: ledger.Entry{Account: id, Bucket: ledger.Available, Amount: bal}})
+		w.initial[cur] += bal
 	}
 	return w
 }
@@ -81,7 +86,12 @@ func (w *world) start() {
 		return
 	}
 	id := uuid.New()
-	tr, cmd := saga.Start(saga.Transfer{ID: id, From: from, To: to,
+	// Usually the source's currency; sometimes whatever the client says.
+	cur := w.accounts[from].Currency
+	if rapid.IntRange(0, 3).Draw(w.t, "wrong currency") == 0 {
+		cur = rapid.SampledFrom(currencies).Draw(w.t, "claimed currency")
+	}
+	tr, cmd := saga.Start(saga.Transfer{ID: id, From: from, To: to, Currency: cur,
 		Amount: rapid.Int64Range(1, 60).Draw(w.t, "amount")}, w.now, w.p)
 	w.record(id, "", tr)
 	w.order = append(w.order, id)
@@ -111,8 +121,11 @@ func (w *world) ledgerHandle(c wire.Command) {
 		d = ledger.Decide(c, prior, acct)
 		w.ops[k] = d
 		for _, e := range d.Entries {
-			w.journal = append(w.journal, posted{c.SagaID, e})
+			w.journal = append(w.journal, posted{c.SagaID, c.Currency, e})
 			if a, ok := w.accounts[e.Account]; ok {
+				if a.Currency != c.Currency {
+					w.t.Fatalf("%s %s posted to account %d in %s", c.Step, c.Currency, a.ID, a.Currency)
+				}
 				if e.Bucket == ledger.Available {
 					a.Available += e.Amount
 				} else {
@@ -179,22 +192,25 @@ func (w *world) done() bool {
 
 func (w *world) check() {
 	t := w.t
-	var total, customer, held, clearing int64
+	total, customer, held, clearing := map[string]int64{}, map[string]int64{}, map[string]int64{}, map[string]int64{}
 	for _, p := range w.journal {
-		total += p.Amount
+		total[p.currency] += p.Amount
 		if p.Account < ledger.Equity {
-			clearing += p.Amount
+			clearing[p.currency] += p.Amount
 		}
 	}
 	for _, a := range w.accounts {
-		customer += a.Available + a.Held
-		held += a.Held
+		customer[a.Currency] += a.Available + a.Held
+		held[a.Currency] += a.Held
 	}
-	if total != 0 {
-		t.Fatalf("journal does not balance: %d", total)
-	}
-	if customer != w.initial || clearing != 0 || held != 0 {
-		t.Fatalf("money not conserved: customer %d initial %d clearing %d held %d", customer, w.initial, clearing, held)
+	for _, c := range currencies {
+		if total[c] != 0 {
+			t.Fatalf("%s journal does not balance: %d", c, total[c])
+		}
+		if customer[c] != w.initial[c] || clearing[c] != 0 || held[c] != 0 {
+			t.Fatalf("%s not conserved: customer %d initial %d clearing %d held %d",
+				c, customer[c], w.initial[c], clearing[c], held[c])
+		}
 	}
 	for _, id := range w.order {
 		tr := w.sagas[id]

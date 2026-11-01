@@ -39,6 +39,8 @@ import (
 var (
 	pgURL   string
 	brokers []string
+	// Accounts 1-4 are USD, 5-8 EUR, 9-12 USD, ... (ledger.SeedCurrency).
+	currencies = []string{"USD", "EUR"}
 )
 
 func TestMain(m *testing.M) {
@@ -133,7 +135,7 @@ func newSystem(t *testing.T, relayMode string, accounts int, policy saga.Policy)
 	if err := db.Migrate(ctx, pool); err != nil {
 		t.Fatal(err)
 	}
-	if err := ledger.Seed(ctx, pool, accounts, 1000, 10); err != nil {
+	if err := ledger.Seed(ctx, pool, accounts, 1000, 10, currencies); err != nil {
 		t.Fatal(err)
 	}
 	s := &system{t: t, pool: pool, commands: name + ".commands", replies: name + ".replies", cancel: cancel}
@@ -223,8 +225,13 @@ type view struct {
 	Reason string     `json:"reason"`
 }
 
+// post sends a transfer in the source's currency.
 func (s *system) post(key string, from, to, amount int64) (int, view) {
-	body := fmt.Sprintf(`{"from":%d,"to":%d,"amount":%d}`, from, to, amount)
+	return s.postIn(key, ledger.SeedCurrency(from, currencies), from, to, amount)
+}
+
+func (s *system) postIn(key, currency string, from, to, amount int64) (int, view) {
+	body := fmt.Sprintf(`{"from":%d,"to":%d,"amount":%d,"currency":%q}`, from, to, amount, currency)
 	req, _ := http.NewRequest(http.MethodPost, s.api.URL+"/transfers", strings.NewReader(body))
 	req.Header.Set("Idempotency-Key", key)
 	resp, err := http.DefaultClient.Do(req)
@@ -264,21 +271,32 @@ func TestTransfersEndToEnd(t *testing.T) {
 			s := newSystem(t, mode, 20, saga.Policy{StepTimeout: 5 * time.Second, MaxBackoff: 10 * time.Second, HoldAttempts: 3})
 			cases := []struct {
 				from, to, amount int64
+				currency         string // "" = the source's
 				want             saga.State
+				reason           string
 			}{
-				{1, 2, 100, saga.Completed},
-				{3, 4, 5000, saga.Rejected}, // balance is 1000
-				{5, 10, 50, saga.Refunded},  // every 10th account is frozen
-				{6, 99, 50, saga.Refunded},  // no such account
-				{10, 1, 50, saga.Rejected},  // frozen source
+				{1, 2, 100, "", saga.Completed, ""},
+				{5, 13, 100, "", saga.Completed, ""}, // EUR to EUR, same shard
+				{6, 15, 100, "", saga.Completed, ""}, // EUR to EUR, shard 2 -> 3
+				{3, 4, 5000, "", saga.Rejected, "insufficient funds"},
+				{5, 10, 50, "", saga.Refunded, "account frozen"},
+				{6, 99, 50, "", saga.Refunded, "account not found"},
+				{10, 1, 50, "", saga.Rejected, "account frozen"},
+				{1, 5, 50, "", saga.Refunded, "currency mismatch"},    // USD source, EUR destination
+				{2, 3, 50, "EUR", saga.Rejected, "currency mismatch"}, // client names the wrong currency
 			}
 			for i, c := range cases {
-				code, v := s.post(fmt.Sprintf("k%d", i), c.from, c.to, c.amount)
+				cur := c.currency
+				if cur == "" {
+					cur = ledger.SeedCurrency(c.from, currencies)
+				}
+				code, v := s.postIn(fmt.Sprintf("k%d", i), cur, c.from, c.to, c.amount)
 				if code != http.StatusCreated {
 					t.Fatalf("POST %d: %d", i, code)
 				}
-				if got := s.wait(v.ID); got.State != c.want {
-					t.Errorf("%d->%d %d: %s (%s), want %s", c.from, c.to, c.amount, got.State, got.Reason, c.want)
+				if got := s.wait(v.ID); got.State != c.want || got.Reason != c.reason {
+					t.Errorf("%d->%d %d %s: %s (%s), want %s (%s)", c.from, c.to, c.amount, cur,
+						got.State, got.Reason, c.want, c.reason)
 				}
 			}
 			s.audit()
@@ -356,7 +374,8 @@ func TestLedgerReplaysRecordedDecision(t *testing.T) {
 	s := newSystem(t, "none", 3, saga.DefaultPolicy())
 	led := &ledger.Store{DB: s.pool, Replies: s.replies}
 	id := uuid.New()
-	hold := wire.Command{SagaID: id, Step: wire.Hold, Account: 1, Amount: 1500, Attempt: 1, MsgID: wire.CommandID(id, wire.Hold, 1)}
+	hold := wire.Command{SagaID: id, Step: wire.Hold, Account: 1, Amount: 1500, Currency: "USD", Attempt: 1,
+		MsgID: wire.CommandID(id, wire.Hold, 1)}
 	if res, err := led.Handle(ctx, hold); err != nil || res != "applied" {
 		t.Fatalf("first hold: %s %v", res, err)
 	}
@@ -387,5 +406,51 @@ func TestLedgerReplaysRecordedDecision(t *testing.T) {
 	s.pool.QueryRow(ctx, `SELECT held FROM ledger.accounts WHERE id = 1`).Scan(&held)
 	if held != 0 {
 		t.Fatalf("held %d after a replayed rejection", held)
+	}
+}
+
+func TestCurrencyRequiredAndKeyed(t *testing.T) {
+	s := newSystem(t, "poll", 5, saga.DefaultPolicy())
+	for _, cur := range []string{"", "usd", "US", "USDT"} {
+		if code, _ := s.postIn("bad-"+cur, cur, 1, 2, 10); code != http.StatusUnprocessableEntity {
+			t.Errorf("currency %q: HTTP %d, want 422", cur, code)
+		}
+	}
+	if code, _ := s.postIn("k", "USD", 1, 2, 10); code != http.StatusCreated {
+		t.Fatalf("first POST: %d", code)
+	}
+	if code, _ := s.postIn("k", "EUR", 1, 2, 10); code != http.StatusConflict {
+		t.Fatalf("same key, other currency: %d, want 409", code)
+	}
+}
+
+// The audit must see money crossing currencies even when every operation
+// balances: a forged EUR operation that pays a USD account out of clearing.
+func TestAuditCatchesCrossCurrencyPosting(t *testing.T) {
+	ctx := context.Background()
+	s := newSystem(t, "none", 8, saga.DefaultPolicy())
+	if _, err := s.pool.Exec(ctx, `
+		WITH op AS (INSERT INTO ledger.operations (saga_id, step, account_id, amount, currency, outcome)
+		            VALUES (gen_random_uuid(), 'forged', 1, 5, 'EUR', 'ok') RETURNING id)
+		INSERT INTO ledger.entries (op_id, account_id, bucket, amount)
+		SELECT id, a, 'available', x FROM op, (VALUES (1::bigint, 5::bigint), ($1::bigint, -5::bigint)) v(a, x)`,
+		ledger.Clearing(ledger.Shard(1))); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.pool.Exec(ctx, `UPDATE ledger.accounts SET available = available + 5 WHERE id = 1`); err != nil {
+		t.Fatal(err)
+	}
+	rep, err := check.Run(ctx, s.pool, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cross, usd, eur bool
+	for _, v := range rep.Violations {
+		cross = cross || strings.Contains(v, "posts to account 1 in another currency")
+		usd = usd || strings.HasPrefix(v, "USD: customer money")
+		eur = eur || strings.HasPrefix(v, "EUR: customer money")
+	}
+	if !cross || !usd || !eur {
+		t.Fatalf("violations %q: want the cross-currency leg and both currencies out of balance", rep.Violations)
 	}
 }
