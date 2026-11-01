@@ -24,6 +24,10 @@ var (
 		[]string{"consumer"})
 	Relayed = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "relay_messages_total", Help: "Outbox rows written to Kafka."}, []string{"mode", "table"})
+	SagaStuck = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "saga_stuck", Help: "Open transfers accepted more than STUCK_AFTER ago, by state."}, []string{"state"})
+	SagaOldestOpen = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "saga_oldest_open_seconds", Help: "Age of the oldest open transfer, 0 if none."})
 	HTTP = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "http_request_duration_seconds", Help: "API latency.", Buckets: latency}, []string{"route", "code"})
 )

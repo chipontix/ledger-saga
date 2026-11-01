@@ -190,6 +190,43 @@ func (s *Store) SweepTimeouts(ctx context.Context, limit int) (int, error) {
 	return len(due), tx.Commit(ctx)
 }
 
+// Stuck counts open transfers accepted more than after ago, by state, and
+// exports the counts and the age of the oldest open transfer as gauges.
+// Nothing gives up after hold (ADR-0002), and a refused capture, refund or
+// release is ignored on purpose (OnReply), so an outage or a bug shows up
+// here and nowhere else.
+func (s *Store) Stuck(ctx context.Context, after time.Duration) (map[State]int, time.Duration, error) {
+	now := s.Now()
+	rows, err := s.DB.Query(ctx, `SELECT state, count(*) FILTER (WHERE created_at < $1), min(created_at)
+		FROM saga.transfers WHERE finished_at IS NULL GROUP BY state`, now.Add(-after))
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	stuck := map[State]int{}
+	var oldest time.Duration
+	for rows.Next() {
+		var st State
+		var n int
+		var first time.Time
+		if err := rows.Scan(&st, &n, &first); err != nil {
+			return nil, 0, err
+		}
+		if n > 0 {
+			stuck[st] = n
+		}
+		oldest = max(oldest, now.Sub(first))
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	for st := range pending { // every waiting state, so a cleared one drops to 0
+		metrics.SagaStuck.WithLabelValues(string(st)).Set(float64(stuck[st]))
+	}
+	metrics.SagaOldestOpen.Set(oldest.Seconds())
+	return stuck, oldest, nil
+}
+
 func (s *Store) save(ctx context.Context, tx pgx.Tx, cur View, next Transfer, now time.Time) error {
 	var finished *time.Time
 	if next.State.Terminal() {

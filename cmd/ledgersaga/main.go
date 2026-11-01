@@ -238,6 +238,22 @@ func orchestrator(ctx context.Context, _ []string) error {
 		}
 	}()
 
+	go func() {
+		after := envDur("STUCK_AFTER", time.Minute)
+		tick := time.NewTicker(envDur("STUCK_EVERY", 5*time.Second))
+		defer tick.Stop()
+		for {
+			if _, _, err := store.Stuck(ctx, after); err != nil && ctx.Err() == nil {
+				slog.Warn("stuck sagas", "err", err)
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-tick.C:
+			}
+		}
+	}()
+
 	serveMetrics(ctx)
 	serve(ctx, env("HTTP_ADDR", ":8080"), api.Handler())
 	slog.Info("orchestrator up")
