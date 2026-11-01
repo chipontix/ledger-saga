@@ -33,10 +33,13 @@ type Store struct {
 	OnFinish func(uuid.UUID) // called after a terminal state commits
 }
 
-type Request struct{ From, To, Amount int64 }
+type Request struct {
+	From, To, Amount int64
+	Currency         string
+}
 
 func (r Request) hash() []byte {
-	h := sha256.Sum256(fmt.Appendf(nil, "%d|%d|%d", r.From, r.To, r.Amount))
+	h := sha256.Sum256(fmt.Appendf(nil, "%d|%d|%d|%s", r.From, r.To, r.Amount, r.Currency))
 	return h[:]
 }
 
@@ -48,11 +51,11 @@ type View struct {
 	version    int
 }
 
-const cols = `id, from_account, to_account, amount, state, attempt, deadline, reason, version, created_at, finished_at`
+const cols = `id, from_account, to_account, amount, currency, state, attempt, deadline, reason, version, created_at, finished_at`
 
 func scan(row pgx.Row) (View, error) {
 	var v View
-	err := row.Scan(&v.ID, &v.From, &v.To, &v.Amount, &v.State, &v.Attempt, &v.Deadline, &v.Reason,
+	err := row.Scan(&v.ID, &v.From, &v.To, &v.Amount, &v.Currency, &v.State, &v.Attempt, &v.Deadline, &v.Reason,
 		&v.version, &v.CreatedAt, &v.FinishedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return v, ErrNotFound
@@ -65,7 +68,8 @@ func scan(row pgx.Row) (View, error) {
 // different request it is ErrKeyReuse.
 func (s *Store) Create(ctx context.Context, key string, req Request) (v View, created bool, err error) {
 	now := s.Now()
-	t, cmd := Start(Transfer{ID: uuid.Must(uuid.NewV7()), From: req.From, To: req.To, Amount: req.Amount}, now, s.Policy)
+	t, cmd := Start(Transfer{ID: uuid.Must(uuid.NewV7()), From: req.From, To: req.To, Amount: req.Amount,
+		Currency: req.Currency}, now, s.Policy)
 
 	tx, err := s.DB.Begin(ctx)
 	if err != nil {
@@ -75,9 +79,9 @@ func (s *Store) Create(ctx context.Context, key string, req Request) (v View, cr
 	// ON CONFLICT waits for a concurrent insert of the same key to finish, so
 	// two racing requests cannot both create a transfer.
 	tag, err := tx.Exec(ctx, `INSERT INTO saga.transfers
-		(id, idem_key, request_hash, from_account, to_account, amount, state, attempt, deadline, version, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 1, $10) ON CONFLICT (idem_key) DO NOTHING`,
-		t.ID, key, req.hash(), t.From, t.To, t.Amount, t.State, t.Attempt, t.Deadline, now)
+		(id, idem_key, request_hash, from_account, to_account, amount, currency, state, attempt, deadline, version, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 1, $11) ON CONFLICT (idem_key) DO NOTHING`,
+		t.ID, key, req.hash(), t.From, t.To, t.Amount, t.Currency, t.State, t.Attempt, t.Deadline, now)
 	if err != nil {
 		return v, false, err
 	}
@@ -85,7 +89,7 @@ func (s *Store) Create(ctx context.Context, key string, req Request) (v View, cr
 		tx.Rollback(ctx)
 		var hash []byte
 		row := s.DB.QueryRow(ctx, `SELECT request_hash, `+cols+` FROM saga.transfers WHERE idem_key = $1`, key)
-		err := row.Scan(&hash, &v.ID, &v.From, &v.To, &v.Amount, &v.State, &v.Attempt, &v.Deadline, &v.Reason,
+		err := row.Scan(&hash, &v.ID, &v.From, &v.To, &v.Amount, &v.Currency, &v.State, &v.Attempt, &v.Deadline, &v.Reason,
 			&v.version, &v.CreatedAt, &v.FinishedAt)
 		if err == nil && !bytes.Equal(hash, req.hash()) {
 			err = ErrKeyReuse

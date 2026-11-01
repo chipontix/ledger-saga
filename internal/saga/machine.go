@@ -68,6 +68,7 @@ type Transfer struct {
 	ID       uuid.UUID
 	From, To int64
 	Amount   int64
+	Currency string
 	State    State
 	Attempt  int
 	Deadline time.Time
@@ -108,13 +109,14 @@ func (t Transfer) Command(now time.Time) wire.Command {
 		acct = t.To
 	}
 	return wire.Command{
-		MsgID:   wire.CommandID(t.ID, step, t.Attempt),
-		SagaID:  t.ID,
-		Step:    step,
-		Account: acct,
-		Amount:  t.Amount,
-		Attempt: t.Attempt,
-		SentAt:  now,
+		MsgID:    wire.CommandID(t.ID, step, t.Attempt),
+		SagaID:   t.ID,
+		Step:     step,
+		Account:  acct,
+		Amount:   t.Amount,
+		Currency: t.Currency,
+		Attempt:  t.Attempt,
+		SentAt:   now,
 	}
 }
 

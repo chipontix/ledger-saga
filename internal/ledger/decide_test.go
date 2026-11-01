@@ -14,7 +14,8 @@ func sum(es []Entry) (s int64) {
 }
 
 func TestDecide(t *testing.T) {
-	acct := Account{ID: 5, Exists: true, Available: 100}
+	acct := Account{ID: 5, Exists: true, Currency: "USD", Available: 100}
+	eur := Account{ID: 5, Exists: true, Currency: "EUR", Available: 100}
 	cases := []struct {
 		name    string
 		step    wire.Step
@@ -25,8 +26,9 @@ func TestDecide(t *testing.T) {
 		legs    int
 	}{
 		{"hold ok", wire.Hold, Prior{}, acct, wire.OK, "", 2},
-		{"hold insufficient", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Available: 9}, wire.Rejected, "insufficient funds", 0},
-		{"hold frozen", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Frozen: true, Available: 100}, wire.Rejected, "account frozen", 0},
+		{"hold insufficient", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Currency: "USD", Available: 9}, wire.Rejected, "insufficient funds", 0},
+		{"hold frozen", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Currency: "USD", Frozen: true, Available: 100}, wire.Rejected, "account frozen", 0},
+		{"hold in another currency", wire.Hold, Prior{}, eur, wire.Rejected, "currency mismatch", 0},
 		{"hold missing", wire.Hold, Prior{}, Account{ID: 5}, wire.Rejected, "account not found", 0},
 		{"hold after release is fenced", wire.Hold, Prior{wire.Release: wire.OK}, acct, wire.Fenced, "released before hold arrived", 0},
 		{"release active hold", wire.Release, Prior{wire.Hold: wire.OK}, acct, wire.OK, "released", 2},
@@ -37,12 +39,13 @@ func TestDecide(t *testing.T) {
 		{"capture without hold", wire.Capture, Prior{}, acct, wire.Rejected, "no active hold", 0},
 		{"capture released hold", wire.Capture, Prior{wire.Hold: wire.OK, wire.Release: wire.OK}, acct, wire.Rejected, "no active hold", 0},
 		{"credit", wire.Credit, Prior{}, acct, wire.OK, "", 2},
+		{"credit in another currency", wire.Credit, Prior{}, eur, wire.Rejected, "currency mismatch", 0},
 		{"credit frozen", wire.Credit, Prior{}, Account{ID: 5, Exists: true, Frozen: true}, wire.Rejected, "account frozen", 0},
 		{"refund", wire.Refund, Prior{wire.Hold: wire.OK, wire.Capture: wire.OK, wire.Credit: wire.Rejected}, acct, wire.OK, "", 2},
 		{"refund uncaptured", wire.Refund, Prior{wire.Hold: wire.OK}, acct, wire.Rejected, "nothing captured", 0},
 	}
 	for _, c := range cases {
-		d := Decide(wire.Command{Step: c.step, Account: 5, Amount: 10}, c.prior, c.acct)
+		d := Decide(wire.Command{Step: c.step, Account: 5, Amount: 10, Currency: "USD"}, c.prior, c.acct)
 		if d.Outcome != c.outcome || d.Reason != c.reason || len(d.Entries) != c.legs || sum(d.Entries) != 0 {
 			t.Errorf("%s: got %+v", c.name, d)
 		}

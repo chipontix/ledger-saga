@@ -17,8 +17,8 @@ func replyFor(tr Transfer, step wire.Step, o wire.Outcome) wire.Reply {
 
 func TestHappyPathAndRefund(t *testing.T) {
 	p := DefaultPolicy()
-	tr, cmd := Start(Transfer{ID: uuid.New(), From: 1, To: 2, Amount: 10}, t0, p)
-	if tr.State != HoldPending || cmd.Step != wire.Hold || cmd.Account != 1 {
+	tr, cmd := Start(Transfer{ID: uuid.New(), From: 1, To: 2, Amount: 10, Currency: "EUR"}, t0, p)
+	if tr.State != HoldPending || cmd.Step != wire.Hold || cmd.Account != 1 || cmd.Currency != "EUR" {
 		t.Fatalf("start: %v %v", tr.State, cmd)
 	}
 	steps := []struct {
@@ -36,7 +36,7 @@ func TestHappyPathAndRefund(t *testing.T) {
 		var c *wire.Command
 		var ok bool
 		tr, c, ok = OnReply(tr, replyFor(tr, s.step, s.outcome), t0, p)
-		if !ok || tr.State != s.want || c.Step != s.next || c.Account != s.account || c.Attempt != 1 {
+		if !ok || tr.State != s.want || c.Step != s.next || c.Account != s.account || c.Attempt != 1 || c.Currency != "EUR" {
 			t.Fatalf("after %s/%s: state %s cmd %+v", s.step, s.outcome, tr.State, c)
 		}
 	}

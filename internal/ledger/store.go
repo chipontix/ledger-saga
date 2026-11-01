@@ -65,8 +65,8 @@ func (s *Store) Handle(ctx context.Context, c wire.Command) (string, error) {
 	if d == nil {
 		result = "applied"
 		a := Account{ID: c.Account}
-		err := tx.QueryRow(ctx, `SELECT available, held, frozen FROM ledger.accounts WHERE id = $1 FOR UPDATE`,
-			c.Account).Scan(&a.Available, &a.Held, &a.Frozen)
+		err := tx.QueryRow(ctx, `SELECT available, held, frozen, currency FROM ledger.accounts WHERE id = $1 FOR UPDATE`,
+			c.Account).Scan(&a.Available, &a.Held, &a.Frozen, &a.Currency)
 		switch {
 		case err == nil:
 			a.Exists = true
@@ -95,9 +95,9 @@ func (s *Store) Handle(ctx context.Context, c wire.Command) (string, error) {
 
 func (s *Store) record(ctx context.Context, tx pgx.Tx, c wire.Command, d Decision) error {
 	var opID int64
-	if err := tx.QueryRow(ctx, `INSERT INTO ledger.operations (saga_id, step, account_id, amount, outcome, reason)
-		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		c.SagaID, c.Step, c.Account, c.Amount, d.Outcome, d.Reason).Scan(&opID); err != nil {
+	if err := tx.QueryRow(ctx, `INSERT INTO ledger.operations (saga_id, step, account_id, amount, currency, outcome, reason)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+		c.SagaID, c.Step, c.Account, c.Amount, c.Currency, d.Outcome, d.Reason).Scan(&opID); err != nil {
 		return err
 	}
 	return post(ctx, tx, opID, d.Entries)
@@ -131,30 +131,44 @@ func post(ctx context.Context, tx pgx.Tx, opID int64, entries []Entry) error {
 	return err
 }
 
-// Seed opens n accounts with the same balance in one balanced operation
-// against equity. Every frozenEvery-th account is frozen (0 = none), so
-// transfers to it exercise the refund path.
-func Seed(ctx context.Context, db *pgxpool.Pool, n int, balance int64, frozenEvery int) error {
+// SeedCurrency is the currency Seed gives account id: blocks of Shards
+// consecutive ids share one, so every shard holds every currency.
+func SeedCurrency(id int64, currencies []string) string {
+	return currencies[int((id-1)/Shards)%len(currencies)]
+}
+
+// Seed opens n accounts with the same balance, one balanced operation
+// against equity per currency. Every frozenEvery-th account is frozen
+// (0 = none), so transfers to it exercise the refund path.
+func Seed(ctx context.Context, db *pgxpool.Pool, n int, balance int64, frozenEvery int, currencies []string) error {
 	tx, err := db.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
-	if _, err := tx.Exec(ctx, `INSERT INTO ledger.accounts (id, available, held, frozen)
-		SELECT i, 0, 0, $2 > 0 AND i % $2 = 0 FROM generate_series(1, $1::bigint) i`, n, frozenEvery); err != nil {
+	byCur := map[string][]Entry{}
+	ids := make([]int64, n)
+	curs := make([]string, n)
+	for i := range n {
+		id := int64(i + 1)
+		ids[i], curs[i] = id, SeedCurrency(id, currencies)
+		byCur[curs[i]] = append(byCur[curs[i]], Entry{id, Available, balance})
+	}
+	if _, err := tx.Exec(ctx, `INSERT INTO ledger.accounts (id, available, held, frozen, currency)
+		SELECT id, 0, 0, $3 > 0 AND id % $3 = 0, cur FROM unnest($1::bigint[], $2::text[]) AS a(id, cur)`,
+		ids, curs, frozenEvery); err != nil {
 		return err
 	}
-	var opID int64
-	if err := tx.QueryRow(ctx, `INSERT INTO ledger.operations (saga_id, step, account_id, amount, outcome)
-		VALUES ($1, 'open', $2, $3, 'ok') RETURNING id`, uuid.New(), Equity, int64(n)*balance).Scan(&opID); err != nil {
-		return err
-	}
-	entries := []Entry{{Equity, Available, -int64(n) * balance}}
-	for i := 1; i <= n; i++ {
-		entries = append(entries, Entry{int64(i), Available, balance})
-	}
-	if err := post(ctx, tx, opID, entries); err != nil {
-		return err
+	for cur, entries := range byCur {
+		total := int64(len(entries)) * balance
+		var opID int64
+		if err := tx.QueryRow(ctx, `INSERT INTO ledger.operations (saga_id, step, account_id, amount, currency, outcome)
+			VALUES ($1, 'open', $2, $3, $4, 'ok') RETURNING id`, uuid.New(), Equity, total, cur).Scan(&opID); err != nil {
+			return err
+		}
+		if err := post(ctx, tx, opID, append(entries, Entry{Equity, Available, -total})); err != nil {
+			return err
+		}
 	}
 	return tx.Commit(ctx)
 }

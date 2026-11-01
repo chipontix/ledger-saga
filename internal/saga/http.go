@@ -38,6 +38,7 @@ type transferJSON struct {
 	From       int64      `json:"from"`
 	To         int64      `json:"to"`
 	Amount     int64      `json:"amount"`
+	Currency   string     `json:"currency"`
 	State      State      `json:"state"`
 	Reason     string     `json:"reason,omitempty"`
 	Attempt    int        `json:"attempt"`
@@ -46,7 +47,7 @@ type transferJSON struct {
 }
 
 func render(v View) transferJSON {
-	return transferJSON{v.ID, v.From, v.To, v.Amount, v.State, v.Reason, v.Attempt, v.CreatedAt, v.FinishedAt}
+	return transferJSON{v.ID, v.From, v.To, v.Amount, v.Currency, v.State, v.Reason, v.Attempt, v.CreatedAt, v.FinishedAt}
 }
 
 func (a *API) create(w http.ResponseWriter, r *http.Request) int {
@@ -58,14 +59,20 @@ func (a *API) create(w http.ResponseWriter, r *http.Request) int {
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<10))
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&struct {
-		From   *int64 `json:"from"`
-		To     *int64 `json:"to"`
-		Amount *int64 `json:"amount"`
-	}{&req.From, &req.To, &req.Amount}); err != nil {
-		return fail(w, http.StatusBadRequest, "body must be {\"from\":int,\"to\":int,\"amount\":int}")
+		From     *int64  `json:"from"`
+		To       *int64  `json:"to"`
+		Amount   *int64  `json:"amount"`
+		Currency *string `json:"currency"`
+	}{&req.From, &req.To, &req.Amount, &req.Currency}); err != nil {
+		return fail(w, http.StatusBadRequest, "body must be {\"from\":int,\"to\":int,\"amount\":int,\"currency\":string}")
 	}
 	if req.Amount <= 0 || req.From <= 0 || req.To <= 0 || req.From == req.To {
 		return fail(w, http.StatusUnprocessableEntity, "amount must be positive and from/to distinct positive account ids")
+	}
+	// The orchestrator does not know account currencies; the ledger checks
+	// them. Here only the shape: no default, an implicit currency is a bug.
+	if !isCurrency(req.Currency) {
+		return fail(w, http.StatusUnprocessableEntity, "currency must be a three-letter ISO 4217 code, e.g. \"USD\"")
 	}
 	v, created, err := a.Store.Create(r.Context(), key, req)
 	switch {
@@ -153,6 +160,18 @@ func (a *API) unsubscribe(id uuid.UUID, c chan struct{}) {
 	} else {
 		a.waiters[id] = ws
 	}
+}
+
+func isCurrency(c string) bool {
+	if len(c) != 3 {
+		return false
+	}
+	for _, r := range c {
+		if r < 'A' || r > 'Z' {
+			return false
+		}
+	}
+	return true
 }
 
 func timed(route string, h func(http.ResponseWriter, *http.Request) int) http.HandlerFunc {

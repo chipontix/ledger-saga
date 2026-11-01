@@ -33,13 +33,14 @@ const (
 // Command is sent orchestrator -> ledger, keyed by account so one account's
 // commands share a partition.
 type Command struct {
-	MsgID   string    `json:"msg_id"`
-	SagaID  uuid.UUID `json:"saga_id"`
-	Step    Step      `json:"step"`
-	Account int64     `json:"account"`
-	Amount  int64     `json:"amount"`
-	Attempt int       `json:"attempt"`
-	SentAt  time.Time `json:"sent_at"`
+	MsgID    string    `json:"msg_id"`
+	SagaID   uuid.UUID `json:"saga_id"`
+	Step     Step      `json:"step"`
+	Account  int64     `json:"account"`
+	Amount   int64     `json:"amount"`
+	Currency string    `json:"currency"` // ISO 4217; the ledger checks it against the account
+	Attempt  int       `json:"attempt"`
+	SentAt   time.Time `json:"sent_at"`
 }
 
 // Reply is sent ledger -> orchestrator, keyed by saga.

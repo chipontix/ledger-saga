@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/chipontix/ledger-saga/internal/ledger"
 	"github.com/chipontix/ledger-saga/internal/saga"
 )
 
@@ -50,6 +51,7 @@ func load(ctx context.Context, args []string) error {
 	d := fs.Duration("d", 60*time.Second, "measured duration")
 	warm := fs.Duration("warmup", 10*time.Second, "unmeasured lead-in")
 	accounts := fs.Int("accounts", 10_000, "account ids to draw from")
+	currencies := fs.String("currencies", "USD", "as given to seed; each transfer is in its source's currency")
 	label := fs.String("label", "", "")
 	fs.Parse(args)
 
@@ -61,6 +63,7 @@ func load(ctx context.Context, args []string) error {
 	res := &loadResult{Label: *label, Concurrency: *c, Window: d.Seconds(), States: map[saga.State]int{},
 		Timeline: make([]int, int((*warm+*d)/time.Second)+60), Started: start}
 	var lat, posts []time.Duration
+	curs := strings.Split(*currencies, ",")
 
 	var wg sync.WaitGroup
 	for w := range *c {
@@ -72,7 +75,8 @@ func load(ctx context.Context, args []string) error {
 				if to == from {
 					continue
 				}
-				body := fmt.Sprintf(`{"from":%d,"to":%d,"amount":%d}`, from, to, 1+rng.IntN(100))
+				body := fmt.Sprintf(`{"from":%d,"to":%d,"amount":%d,"currency":%q}`, from, to, 1+rng.IntN(100),
+					ledger.SeedCurrency(from, curs))
 				t0 := time.Now()
 				v, retries := createAndWait(ctx, client, *api, uuid.NewString(), body)
 				done := time.Now()

@@ -19,7 +19,7 @@ import (
 type Report struct {
 	States      map[saga.State]int `json:"states"`
 	Operations  int                `json:"operations"`
-	InFlight    int64              `json:"in_flight"` // clearing balance: captured, not yet credited/refunded
+	InFlight    int64              `json:"in_flight"` // clearing balance: captured, not yet credited/refunded (summed over currencies, checked per currency)
 	Violations  []string           `json:"violations"`
 	Quiescent   bool               `json:"quiescent"`
 	CustomerSum int64              `json:"customer_sum"`
@@ -80,31 +80,68 @@ func Run(ctx context.Context, db *pgxpool.Pool, quiescent bool) (*Report, error)
 		return nil, err
 	}
 
-	var held, opened int64
-	if err := tx.QueryRow(ctx, `SELECT
-			coalesce((SELECT sum(available + held) FROM ledger.accounts), 0),
-			coalesce((SELECT sum(held) FROM ledger.accounts), 0),
-			coalesce((SELECT sum(amount) FROM ledger.entries WHERE account_id < $1), 0),
-			coalesce((SELECT -sum(amount) FROM ledger.entries WHERE account_id = $2), 0)`,
-		ledger.Equity, ledger.Equity).Scan(&r.CustomerSum, &held, &r.InFlight, &opened); err != nil {
+	// 5. Every customer leg is in its account's currency: no operation ever
+	// moves EUR into a USD balance.
+	if err := each(ctx, tx, `
+		SELECT e.op_id, e.account_id FROM ledger.entries e
+		JOIN ledger.operations o ON o.id = e.op_id
+		JOIN ledger.accounts a ON a.id = e.account_id
+		WHERE a.currency <> o.currency`,
+		func(op, acct int64) { r.fail("operation %d posts to account %d in another currency", op, acct) }); err != nil {
 		return nil, err
 	}
-	if r.CustomerSum+r.InFlight != opened {
-		r.fail("customer money %d + in flight %d != opened %d", r.CustomerSum, r.InFlight, opened)
+
+	// 6. Money is conserved per currency: customer balances plus what is in
+	// the clearing accounts equal what was opened against equity.
+	var held int64
+	if err := tx.QueryRow(ctx, `SELECT coalesce(sum(held), 0) FROM ledger.accounts`).Scan(&held); err != nil {
+		return nil, err
+	}
+	rows, err := tx.Query(ctx, `
+		SELECT currency, coalesce(c.customer, 0), coalesce(j.in_flight, 0), coalesce(j.opened, 0)
+		FROM (SELECT currency, sum(available + held) customer FROM ledger.accounts GROUP BY currency) c
+		FULL JOIN (SELECT o.currency,
+		                  sum(e.amount) FILTER (WHERE e.account_id < $1) in_flight,
+		                  -sum(e.amount) FILTER (WHERE e.account_id = $1) opened
+		           FROM ledger.entries e JOIN ledger.operations o ON o.id = e.op_id
+		           GROUP BY o.currency) j USING (currency)
+		ORDER BY currency`, ledger.Equity)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var cur string
+		var customer, inFlight, open int64
+		if err := rows.Scan(&cur, &customer, &inFlight, &open); err != nil {
+			return nil, err
+		}
+		if customer+inFlight != open {
+			r.fail("%s: customer money %d + in flight %d != opened %d", cur, customer, inFlight, open)
+		}
+		if quiescent && inFlight != 0 {
+			r.fail("%s: at rest but %d in clearing", cur, inFlight)
+		}
+		r.CustomerSum += customer
+		r.InFlight += inFlight
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
-	// 5. Per saga: ledger effects exactly as the terminal state allows, and
-	// the right amount moved between the right accounts.
+	// 7. Per saga: ledger effects exactly as the terminal state allows, the
+	// right amount moved between the right accounts, in the saga's currency.
 	type sagaRow struct {
 		saga.Transfer
 		src, dst int64
+		wrongCur int
 		ops      map[wire.Step]string
 	}
 	sagas := map[uuid.UUID]*sagaRow{}
-	rows, err := tx.Query(ctx, `
+	rows, err = tx.Query(ctx, `
 		SELECT t.id, t.state, t.amount,
 		       coalesce(sum(e.amount) FILTER (WHERE e.account_id = t.from_account), 0),
-		       coalesce(sum(e.amount) FILTER (WHERE e.account_id = t.to_account), 0)
+		       coalesce(sum(e.amount) FILTER (WHERE e.account_id = t.to_account), 0),
+		       count(DISTINCT o.id) FILTER (WHERE o.currency <> t.currency)
 		FROM saga.transfers t
 		LEFT JOIN ledger.operations o ON o.saga_id = t.id
 		LEFT JOIN ledger.entries e ON e.op_id = o.id
@@ -114,11 +151,14 @@ func Run(ctx context.Context, db *pgxpool.Pool, quiescent bool) (*Report, error)
 	}
 	for rows.Next() {
 		s := &sagaRow{ops: map[wire.Step]string{}}
-		if err := rows.Scan(&s.ID, &s.State, &s.Amount, &s.src, &s.dst); err != nil {
+		if err := rows.Scan(&s.ID, &s.State, &s.Amount, &s.src, &s.dst, &s.wrongCur); err != nil {
 			return nil, err
 		}
 		sagas[s.ID] = s
 		r.States[s.State]++
+		if s.wrongCur > 0 {
+			r.fail("saga %s: %d ledger operations in another currency than the transfer", s.ID, s.wrongCur)
+		}
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -167,7 +207,7 @@ func Run(ctx context.Context, db *pgxpool.Pool, quiescent bool) (*Report, error)
 		}
 	}
 
-	// 6. The transition log is a legal path ending in the current state.
+	// 8. The transition log is a legal path ending in the current state.
 	rows, err = tx.Query(ctx, `SELECT saga_id, seq, from_state, to_state FROM saga.transitions ORDER BY saga_id, seq`)
 	if err != nil {
 		return nil, err
@@ -202,13 +242,8 @@ func Run(ctx context.Context, db *pgxpool.Pool, quiescent bool) (*Report, error)
 		return nil, err
 	}
 
-	if quiescent {
-		if held != 0 || r.InFlight != 0 {
-			r.fail("at rest but %d held and %d in clearing", held, r.InFlight)
-		}
-		if r.CustomerSum != opened {
-			r.fail("at rest customer money %d != opened %d", r.CustomerSum, opened)
-		}
+	if quiescent && held != 0 {
+		r.fail("at rest but %d held", held)
 	}
 	return r, nil
 }

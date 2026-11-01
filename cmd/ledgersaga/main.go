@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -130,13 +131,14 @@ func seed(ctx context.Context, args []string) error {
 	n := fs.Int("accounts", 10_000, "accounts to open")
 	bal := fs.Int64("balance", 1_000_000, "opening balance of each account, minor units")
 	frozen := fs.Int("frozen-every", 50, "freeze every n-th account (0 = none)")
+	currencies := fs.String("currencies", "USD", "comma-separated; consecutive blocks of ledger.Shards accounts take turns")
 	fs.Parse(args)
 	p, err := pool(ctx)
 	if err != nil {
 		return err
 	}
 	defer p.Close()
-	return ledger.Seed(ctx, p, *n, *bal, *frozen)
+	return ledger.Seed(ctx, p, *n, *bal, *frozen, strings.Split(*currencies, ","))
 }
 
 func policy() saga.Policy {

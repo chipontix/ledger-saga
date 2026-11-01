@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS saga.transfers (
     from_account bigint NOT NULL,
     to_account   bigint NOT NULL,
     amount       bigint NOT NULL CHECK (amount > 0),
+    currency     text   NOT NULL,
     state        text   NOT NULL,
     attempt      int    NOT NULL,
     deadline     timestamptz NOT NULL,
@@ -55,17 +56,21 @@ CREATE TABLE IF NOT EXISTS ledger.accounts (
     id        bigint PRIMARY KEY CHECK (id > 0),
     available bigint  NOT NULL CHECK (available >= 0),
     held      bigint  NOT NULL CHECK (held >= 0),
-    frozen    boolean NOT NULL DEFAULT false
+    frozen    boolean NOT NULL DEFAULT false,
+    currency  text    NOT NULL CHECK (currency ~ '^[A-Z]{3}$')
 );
 
 -- One row per (saga, step): the business-level idempotency key. Rejections
 -- and fences are recorded too, so a duplicate replays the original answer.
+-- An operation is in one currency; its entries carry none of their own, so
+-- clearing and equity accounts hold several currencies without mixing them.
 CREATE TABLE IF NOT EXISTS ledger.operations (
     id         bigserial PRIMARY KEY,
     saga_id    uuid   NOT NULL,
     step       text   NOT NULL,
     account_id bigint NOT NULL,
     amount     bigint NOT NULL,
+    currency   text   NOT NULL,
     outcome    text   NOT NULL,
     reason     text   NOT NULL DEFAULT '',
     at         timestamptz NOT NULL DEFAULT now(),

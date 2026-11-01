@@ -47,6 +47,7 @@ type Account struct {
 	ID        int64
 	Exists    bool
 	Frozen    bool
+	Currency  string
 	Available int64
 	Held      int64
 }
@@ -79,6 +80,8 @@ func Decide(cmd wire.Command, prior Prior, a Account) Decision {
 			return reject("account not found")
 		case a.Frozen:
 			return reject("account frozen")
+		case a.Currency != cmd.Currency:
+			return reject("currency mismatch")
 		case a.Available < x:
 			return reject("insufficient funds")
 		}
@@ -107,6 +110,11 @@ func Decide(cmd wire.Command, prior Prior, a Account) Decision {
 			return reject("account not found")
 		case a.Frozen:
 			return reject("account frozen")
+		case a.Currency != cmd.Currency:
+			// The transfer is denominated in the source's currency (checked at
+			// hold); a destination in another one is refused and refunded.
+			// There is no conversion.
+			return reject("currency mismatch")
 		}
 		return Decision{Outcome: wire.OK, Entries: []Entry{{clearing, Available, -x}, {a.ID, Available, x}}}
 
