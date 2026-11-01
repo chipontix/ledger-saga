@@ -66,6 +66,7 @@ func chaos(ctx context.Context, args []string) error {
 	transfers := fs.Int("transfers", 200, "transfers per run")
 	accounts := fs.Int("accounts", 40, "accounts per run")
 	parallel := fs.Int("parallel", 4, "runs at once")
+	portBase := fs.Int("port-base", 21000, "first local port; each parallel slot takes 10 from here")
 	out := fs.String("out", "docs/chaos-matrix.md", "markdown report")
 	jsonOut := fs.String("json", "results/chaos.json", "machine-readable results")
 	logs := fs.String("logs", "results/raw", "per-process logs")
@@ -114,7 +115,7 @@ func chaos(ctx context.Context, args []string) error {
 		slot := <-slots
 		wg.Go(func() {
 			defer func() { slots <- slot }()
-			h := &harness{run: r, bin: bin, admin: *admin, slot: slot, transfers: *transfers,
+			h := &harness{run: r, bin: bin, admin: *admin, slot: slot, portBase: *portBase, transfers: *transfers,
 				accounts: *accounts, logDir: filepath.Join(*logs, runName(r)), keep: *keep}
 			h.execute(ctx)
 			mark := "PASS"
@@ -159,7 +160,7 @@ var stamp = strconv.FormatInt(time.Now().Unix(), 36)
 type harness struct {
 	*run
 	bin, admin, logDir  string
-	slot                int
+	slot, portBase      int
 	transfers, accounts int
 	keep                bool
 	procs               []*proc
@@ -210,7 +211,7 @@ func (h *harness) do(ctx context.Context, name string) error {
 	}
 	u, _ := url.Parse(h.admin)
 	u.Path = "/" + name
-	base := 21000 + h.slot*10
+	base := h.portBase + h.slot*10
 	envs := []string{
 		"PG_URL=" + u.String(), "TOPIC_PREFIX=" + name + "." + stamp + ".", "PARTITIONS=4", "PG_MAX_CONNS=8",
 		"STEP_TIMEOUT=1s", "HOLD_ATTEMPTS=2", "MAX_BACKOFF=4s", "SWEEP_EVERY=50ms", "RETRY_EVERY=@every 5s", "RETRY_WORK=1s",
