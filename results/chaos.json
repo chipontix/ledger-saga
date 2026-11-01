@@ -9,717 +9,143 @@
     "kills": 0,
     "keys": 201,
     "states": {
-      "COMPLETED": 149,
-      "REFUNDED": 24,
-      "REJECTED": 28
-    },
-    "consumer_results": {
-      "ledger_applied": 571,
-      "ledger_deferred": 76,
-      "ledger_duplicate": 55,
-      "ledger_replayed": 23,
-      "orch_applied": 571,
-      "orch_deferred": 76,
-      "orch_duplicate": 80
-    },
-    "quiesce_ns": 6209988792,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "none",
-    "process": "-",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 0,
-    "restart_delay_ns": 1300000000,
-    "kills": 0,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 4,
-      "COMPLETED": 142,
-      "REFUNDED": 22,
-      "REJECTED": 33
-    },
-    "consumer_results": {
-      "ledger_applied": 555,
-      "ledger_deferred": 80,
-      "ledger_duplicate": 58,
-      "ledger_replayed": 28,
-      "orch_applied": 551,
-      "orch_deferred": 80,
-      "orch_duplicate": 94,
-      "orch_stale": 4
-    },
-    "quiesce_ns": 6229057542,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "none",
-    "process": "-",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 0,
-    "restart_delay_ns": 550000000,
-    "kills": 0,
-    "keys": 201,
-    "states": {
       "CANCELLED": 2,
-      "COMPLETED": 154,
-      "REFUNDED": 18,
-      "REJECTED": 27
-    },
-    "consumer_results": {
-      "ledger_applied": 565,
-      "ledger_deferred": 87,
-      "ledger_duplicate": 56,
-      "ledger_replayed": 33,
-      "orch_applied": 563,
-      "orch_deferred": 87,
-      "orch_duplicate": 86,
-      "orch_stale": 2
-    },
-    "quiesce_ns": 6210537000,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "none",
-    "process": "-",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 0,
-    "restart_delay_ns": 2300000000,
-    "kills": 0,
-    "keys": 201,
-    "states": {
-      "COMPLETED": 144,
-      "REFUNDED": 26,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 567,
-      "ledger_deferred": 77,
-      "ledger_duplicate": 61,
-      "ledger_replayed": 28,
-      "orch_applied": 567,
-      "orch_deferred": 77,
-      "orch_duplicate": 87
-    },
-    "quiesce_ns": 6210833334,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "none",
-    "process": "-",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 0,
-    "restart_delay_ns": 1550000000,
-    "kills": 0,
-    "keys": 201,
-    "states": {
-      "COMPLETED": 156,
-      "REFUNDED": 22,
-      "REJECTED": 23
-    },
-    "consumer_results": {
-      "ledger_applied": 579,
-      "ledger_deferred": 97,
-      "ledger_duplicate": 68,
-      "ledger_replayed": 36,
-      "orch_applied": 579,
-      "orch_deferred": 97,
-      "orch_duplicate": 107
-    },
-    "quiesce_ns": 6416692875,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.before_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 16,
-      "COMPLETED": 134,
-      "REFUNDED": 20,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 545,
-      "ledger_deferred": 142,
-      "ledger_duplicate": 61,
-      "ledger_replayed": 80,
-      "orch_applied": 513,
-      "orch_deferred": 140,
-      "orch_duplicate": 143,
-      "orch_stale": 16
-    },
-    "quiesce_ns": 13083797375,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.before_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 15,
-      "COMPLETED": 131,
-      "REFUNDED": 18,
-      "REJECTED": 37
-    },
-    "consumer_results": {
-      "ledger_applied": 532,
-      "ledger_deferred": 143,
-      "ledger_duplicate": 64,
-      "ledger_replayed": 83,
-      "orch_applied": 510,
-      "orch_deferred": 143,
-      "orch_duplicate": 143,
-      "orch_stale": 15
-    },
-    "quiesce_ns": 13687912792,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.before_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 5,
-      "COMPLETED": 147,
-      "REFUNDED": 18,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 554,
-      "ledger_deferred": 134,
-      "ledger_duplicate": 63,
-      "ledger_replayed": 77,
-      "orch_applied": 546,
-      "orch_deferred": 134,
-      "orch_duplicate": 136,
-      "orch_stale": 5
-    },
-    "quiesce_ns": 18342631375,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.before_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 141,
-      "REFUNDED": 24,
-      "REJECTED": 35
-    },
-    "consumer_results": {
-      "ledger_applied": 556,
-      "ledger_deferred": 104,
-      "ledger_duplicate": 62,
-      "ledger_replayed": 55,
-      "orch_applied": 537,
-      "orch_deferred": 104,
-      "orch_duplicate": 129,
-      "orch_stale": 1
-    },
-    "quiesce_ns": 12856120833,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.before_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 5,
-      "COMPLETED": 149,
-      "REFUNDED": 18,
+      "COMPLETED": 114,
+      "REFUNDED": 56,
       "REJECTED": 29
     },
     "consumer_results": {
-      "ledger_applied": 558,
-      "ledger_deferred": 110,
-      "ledger_duplicate": 70,
-      "ledger_replayed": 56,
-      "orch_applied": 540,
-      "orch_deferred": 110,
-      "orch_duplicate": 139,
-      "orch_stale": 5
+      "ledger_applied": 599,
+      "ledger_deferred": 96,
+      "ledger_duplicate": 59,
+      "ledger_replayed": 45,
+      "orch_applied": 597,
+      "orch_deferred": 96,
+      "orch_duplicate": 111,
+      "orch_stale": 2
     },
-    "quiesce_ns": 13072080833,
+    "quiesce_ns": 10743098750,
     "problems": null,
     "pass": true
   },
   {
-    "point": "api.after_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 17,
-      "COMPLETED": 134,
-      "REFUNDED": 23,
-      "REJECTED": 27
-    },
-    "consumer_results": {
-      "ledger_applied": 555,
-      "ledger_deferred": 123,
-      "ledger_duplicate": 63,
-      "ledger_replayed": 69,
-      "orch_applied": 525,
-      "orch_deferred": 121,
-      "orch_duplicate": 128,
-      "orch_stale": 17
-    },
-    "quiesce_ns": 13274734417,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.after_commit",
-    "process": "orchestrator",
+    "point": "none",
+    "process": "-",
     "relay": "poll",
     "seed": 2,
-    "hit": 5,
+    "hit": 0,
     "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 4,
-      "COMPLETED": 134,
-      "REFUNDED": 23,
-      "REJECTED": 40
-    },
-    "consumer_results": {
-      "ledger_applied": 542,
-      "ledger_deferred": 116,
-      "ledger_duplicate": 60,
-      "ledger_replayed": 68,
-      "orch_applied": 530,
-      "orch_deferred": 115,
-      "orch_duplicate": 135,
-      "orch_stale": 4
-    },
-    "quiesce_ns": 13084667375,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.after_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 11,
-      "COMPLETED": 143,
-      "REFUNDED": 15,
-      "REJECTED": 32
-    },
-    "consumer_results": {
-      "ledger_applied": 543,
-      "ledger_deferred": 118,
-      "ledger_duplicate": 56,
-      "ledger_replayed": 65,
-      "orch_applied": 529,
-      "orch_deferred": 118,
-      "orch_duplicate": 123,
-      "orch_stale": 11
-    },
-    "quiesce_ns": 13062132500,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.after_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 8,
-      "COMPLETED": 134,
-      "REFUNDED": 24,
-      "REJECTED": 35
-    },
-    "consumer_results": {
-      "ledger_applied": 549,
-      "ledger_deferred": 127,
-      "ledger_duplicate": 64,
-      "ledger_replayed": 73,
-      "orch_applied": 525,
-      "orch_deferred": 127,
-      "orch_duplicate": 142,
-      "orch_stale": 8
-    },
-    "quiesce_ns": 13066435542,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "api.after_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
+    "kills": 0,
     "keys": 201,
     "states": {
       "CANCELLED": 1,
-      "COMPLETED": 150,
-      "REFUNDED": 19,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 559,
-      "ledger_deferred": 117,
-      "ledger_duplicate": 70,
-      "ledger_replayed": 60,
-      "orch_applied": 547,
-      "orch_deferred": 116,
-      "orch_duplicate": 142,
-      "orch_stale": 1
-    },
-    "quiesce_ns": 12872348708,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.before_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 17,
-      "COMPLETED": 133,
-      "REFUNDED": 20,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 544,
-      "ledger_deferred": 146,
-      "ledger_duplicate": 63,
-      "ledger_replayed": 85,
-      "orch_applied": 520,
-      "orch_deferred": 146,
-      "orch_duplicate": 151,
-      "orch_stale": 17
-    },
-    "quiesce_ns": 13484572459,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.before_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 4,
-      "COMPLETED": 137,
-      "REFUNDED": 21,
-      "REJECTED": 39
-    },
-    "consumer_results": {
-      "ledger_applied": 542,
-      "ledger_deferred": 103,
-      "ledger_duplicate": 66,
-      "ledger_replayed": 57,
-      "orch_applied": 534,
-      "orch_deferred": 103,
-      "orch_duplicate": 120,
-      "orch_stale": 4
-    },
-    "quiesce_ns": 13063615333,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.before_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 202,
-    "states": {
-      "CANCELLED": 5,
-      "COMPLETED": 153,
-      "REFUNDED": 18,
-      "REJECTED": 26
-    },
-    "consumer_results": {
-      "ledger_applied": 567,
-      "ledger_deferred": 114,
-      "ledger_duplicate": 60,
-      "ledger_replayed": 58,
-      "orch_applied": 561,
-      "orch_deferred": 114,
-      "orch_duplicate": 112,
-      "orch_stale": 5
-    },
-    "quiesce_ns": 11860747250,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.before_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 10,
-      "COMPLETED": 135,
-      "REFUNDED": 20,
-      "REJECTED": 36
-    },
-    "consumer_results": {
-      "ledger_applied": 541,
-      "ledger_deferred": 115,
-      "ledger_duplicate": 62,
-      "ledger_replayed": 63,
-      "orch_applied": 523,
-      "orch_deferred": 115,
-      "orch_duplicate": 131,
-      "orch_stale": 10
-    },
-    "quiesce_ns": 13068604791,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.before_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 2,
-      "COMPLETED": 153,
-      "REFUNDED": 21,
-      "REJECTED": 25
-    },
-    "consumer_results": {
-      "ledger_applied": 572,
-      "ledger_deferred": 108,
-      "ledger_duplicate": 71,
-      "ledger_replayed": 56,
-      "orch_applied": 565,
-      "orch_deferred": 107,
-      "orch_duplicate": 131,
-      "orch_stale": 2
-    },
-    "quiesce_ns": 12676105917,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.after_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 23,
-      "COMPLETED": 128,
-      "REFUNDED": 18,
-      "REJECTED": 32
-    },
-    "consumer_results": {
-      "ledger_applied": 534,
-      "ledger_deferred": 134,
-      "ledger_duplicate": 66,
-      "ledger_replayed": 78,
-      "orch_applied": 503,
-      "orch_deferred": 134,
-      "orch_duplicate": 136,
-      "orch_stale": 23
-    },
-    "quiesce_ns": 13444651750,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.after_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 14,
-      "COMPLETED": 131,
-      "REFUNDED": 18,
-      "REJECTED": 38
-    },
-    "consumer_results": {
-      "ledger_applied": 531,
-      "ledger_deferred": 123,
-      "ledger_duplicate": 62,
-      "ledger_replayed": 73,
-      "orch_applied": 512,
-      "orch_deferred": 123,
-      "orch_duplicate": 140,
-      "orch_stale": 14
-    },
-    "quiesce_ns": 18294057209,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.after_commit",
-    "process": "orchestrator",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 202,
-    "states": {
-      "CANCELLED": 4,
-      "COMPLETED": 152,
-      "REFUNDED": 18,
-      "REJECTED": 28
+      "COMPLETED": 103,
+      "REFUNDED": 52,
+      "REJECTED": 45
     },
     "consumer_results": {
       "ledger_applied": 564,
-      "ledger_deferred": 111,
-      "ledger_duplicate": 64,
-      "ledger_replayed": 57,
-      "orch_applied": 558,
-      "orch_deferred": 111,
-      "orch_duplicate": 111,
-      "orch_stale": 4
-    },
-    "quiesce_ns": 12056665041,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "orch.reply.after_commit",
-    "process": "orchestrator",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 142,
-      "REFUNDED": 25,
-      "REJECTED": 33
-    },
-    "consumer_results": {
-      "ledger_applied": 561,
-      "ledger_deferred": 60,
-      "ledger_duplicate": 63,
-      "ledger_replayed": 12,
-      "orch_applied": 551,
-      "orch_deferred": 60,
-      "orch_duplicate": 71,
+      "ledger_deferred": 66,
+      "ledger_duplicate": 69,
+      "ledger_replayed": 21,
+      "orch_applied": 563,
+      "orch_deferred": 66,
+      "orch_duplicate": 83,
       "orch_stale": 1
     },
-    "quiesce_ns": 8428105958,
+    "quiesce_ns": 10548104625,
     "problems": null,
     "pass": true
   },
   {
-    "point": "orch.reply.after_commit",
-    "process": "orchestrator",
+    "point": "none",
+    "process": "-",
     "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
+    "seed": 3,
+    "hit": 0,
+    "restart_delay_ns": 550000000,
+    "kills": 0,
     "keys": 201,
     "states": {
-      "CANCELLED": 14,
-      "COMPLETED": 142,
-      "REFUNDED": 19,
-      "REJECTED": 26
+      "CANCELLED": 6,
+      "COMPLETED": 121,
+      "REFUNDED": 53,
+      "REJECTED": 21
     },
     "consumer_results": {
-      "ledger_applied": 556,
-      "ledger_deferred": 113,
-      "ledger_duplicate": 67,
-      "ledger_replayed": 65,
-      "orch_applied": 536,
-      "orch_deferred": 113,
-      "orch_duplicate": 132,
-      "orch_stale": 14
+      "ledger_applied": 608,
+      "ledger_deferred": 139,
+      "ledger_duplicate": 64,
+      "ledger_replayed": 67,
+      "orch_applied": 602,
+      "orch_deferred": 139,
+      "orch_duplicate": 131,
+      "orch_stale": 6
     },
-    "quiesce_ns": 13259830000,
+    "quiesce_ns": 10743911708,
     "problems": null,
     "pass": true
   },
   {
-    "point": "orch.timeout.before_commit",
+    "point": "none",
+    "process": "-",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 0,
+    "restart_delay_ns": 2300000000,
+    "kills": 0,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 5,
+      "COMPLETED": 118,
+      "REFUNDED": 43,
+      "REJECTED": 35
+    },
+    "consumer_results": {
+      "ledger_applied": 571,
+      "ledger_deferred": 127,
+      "ledger_duplicate": 70,
+      "ledger_replayed": 66,
+      "orch_applied": 566,
+      "orch_deferred": 127,
+      "orch_duplicate": 127,
+      "orch_stale": 5
+    },
+    "quiesce_ns": 8255817000,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "none",
+    "process": "-",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 0,
+    "restart_delay_ns": 1550000000,
+    "kills": 0,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 3,
+      "COMPLETED": 119,
+      "REFUNDED": 47,
+      "REJECTED": 32
+    },
+    "consumer_results": {
+      "ledger_applied": 583,
+      "ledger_deferred": 91,
+      "ledger_duplicate": 64,
+      "ledger_replayed": 33,
+      "orch_applied": 580,
+      "orch_deferred": 91,
+      "orch_duplicate": 99,
+      "orch_stale": 3
+    },
+    "quiesce_ns": 6443322333,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.before_commit",
     "process": "orchestrator",
     "relay": "cdc",
     "seed": 1,
@@ -729,26 +155,26 @@
     "keys": 201,
     "states": {
       "CANCELLED": 2,
-      "COMPLETED": 143,
-      "REFUNDED": 24,
-      "REJECTED": 32
+      "COMPLETED": 112,
+      "REFUNDED": 57,
+      "REJECTED": 30
     },
     "consumer_results": {
-      "ledger_applied": 561,
-      "ledger_deferred": 74,
-      "ledger_duplicate": 57,
-      "ledger_replayed": 34,
-      "orch_applied": 211,
-      "orch_deferred": 48,
-      "orch_duplicate": 104,
+      "ledger_applied": 598,
+      "ledger_deferred": 78,
+      "ledger_duplicate": 68,
+      "ledger_replayed": 23,
+      "orch_applied": 587,
+      "orch_deferred": 78,
+      "orch_duplicate": 95,
       "orch_stale": 2
     },
-    "quiesce_ns": 13468821208,
+    "quiesce_ns": 9603925750,
     "problems": null,
     "pass": true
   },
   {
-    "point": "orch.timeout.before_commit",
+    "point": "api.before_commit",
     "process": "orchestrator",
     "relay": "poll",
     "seed": 2,
@@ -757,25 +183,27 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "COMPLETED": 136,
-      "REFUNDED": 23,
-      "REJECTED": 42
+      "CANCELLED": 4,
+      "COMPLETED": 97,
+      "REFUNDED": 46,
+      "REJECTED": 54
     },
     "consumer_results": {
-      "ledger_applied": 542,
-      "ledger_deferred": 69,
-      "ledger_duplicate": 58,
-      "ledger_replayed": 5,
-      "orch_applied": 446,
-      "orch_deferred": 69,
-      "orch_duplicate": 91
+      "ledger_applied": 537,
+      "ledger_deferred": 86,
+      "ledger_duplicate": 67,
+      "ledger_replayed": 47,
+      "orch_applied": 530,
+      "orch_deferred": 86,
+      "orch_duplicate": 106,
+      "orch_stale": 4
     },
-    "quiesce_ns": 6208290458,
+    "quiesce_ns": 13686123916,
     "problems": null,
     "pass": true
   },
   {
-    "point": "orch.timeout.before_commit",
+    "point": "api.before_commit",
     "process": "orchestrator",
     "relay": "cdc",
     "seed": 3,
@@ -784,27 +212,172 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 8,
-      "COMPLETED": 141,
-      "REFUNDED": 17,
-      "REJECTED": 35
+      "CANCELLED": 68,
+      "COMPLETED": 75,
+      "REFUNDED": 41,
+      "REJECTED": 17
     },
     "consumer_results": {
       "ledger_applied": 542,
-      "ledger_deferred": 128,
-      "ledger_duplicate": 51,
-      "ledger_replayed": 70,
-      "orch_applied": 440,
-      "orch_deferred": 126,
-      "orch_duplicate": 161,
-      "orch_stale": 8
+      "ledger_deferred": 153,
+      "ledger_duplicate": 130,
+      "ledger_replayed": 829,
+      "orch_applied": 471,
+      "orch_deferred": 153,
+      "orch_duplicate": 981,
+      "orch_stale": 68
     },
-    "quiesce_ns": 14889087000,
+    "quiesce_ns": 19457093958,
     "problems": null,
     "pass": true
   },
   {
-    "point": "orch.timeout.before_commit",
+    "point": "api.before_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 7,
+      "COMPLETED": 110,
+      "REFUNDED": 38,
+      "REJECTED": 46
+    },
+    "consumer_results": {
+      "ledger_applied": 542,
+      "ledger_deferred": 127,
+      "ledger_duplicate": 62,
+      "ledger_replayed": 71,
+      "orch_applied": 532,
+      "orch_deferred": 127,
+      "orch_duplicate": 128,
+      "orch_stale": 7
+    },
+    "quiesce_ns": 13024555917,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.before_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 3,
+      "COMPLETED": 118,
+      "REFUNDED": 43,
+      "REJECTED": 37
+    },
+    "consumer_results": {
+      "ledger_applied": 569,
+      "ledger_deferred": 69,
+      "ledger_duplicate": 66,
+      "ledger_replayed": 22,
+      "orch_applied": 560,
+      "orch_deferred": 69,
+      "orch_duplicate": 88,
+      "orch_stale": 3
+    },
+    "quiesce_ns": 8718190042,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.after_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 4,
+      "COMPLETED": 108,
+      "REFUNDED": 56,
+      "REJECTED": 33
+    },
+    "consumer_results": {
+      "ledger_applied": 589,
+      "ledger_deferred": 79,
+      "ledger_duplicate": 51,
+      "ledger_replayed": 23,
+      "orch_applied": 579,
+      "orch_deferred": 79,
+      "orch_duplicate": 93,
+      "orch_stale": 4
+    },
+    "quiesce_ns": 9159671708,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.after_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 12,
+      "COMPLETED": 95,
+      "REFUNDED": 40,
+      "REJECTED": 54
+    },
+    "consumer_results": {
+      "ledger_applied": 523,
+      "ledger_deferred": 125,
+      "ledger_duplicate": 59,
+      "ledger_replayed": 76,
+      "orch_applied": 507,
+      "orch_deferred": 125,
+      "orch_duplicate": 144,
+      "orch_stale": 12
+    },
+    "quiesce_ns": 13763972125,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.after_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 4,
+      "COMPLETED": 121,
+      "REFUNDED": 56,
+      "REJECTED": 21
+    },
+    "consumer_results": {
+      "ledger_applied": 616,
+      "ledger_deferred": 128,
+      "ledger_duplicate": 68,
+      "ledger_replayed": 57,
+      "orch_applied": 611,
+      "orch_deferred": 128,
+      "orch_duplicate": 117,
+      "orch_stale": 4
+    },
+    "quiesce_ns": 7851320708,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.after_commit",
     "process": "orchestrator",
     "relay": "poll",
     "seed": 4,
@@ -814,21 +387,455 @@
     "keys": 201,
     "states": {
       "CANCELLED": 6,
-      "COMPLETED": 134,
-      "REFUNDED": 24,
+      "COMPLETED": 111,
+      "REFUNDED": 43,
+      "REJECTED": 41
+    },
+    "consumer_results": {
+      "ledger_applied": 558,
+      "ledger_deferred": 119,
+      "ledger_duplicate": 64,
+      "ledger_replayed": 67,
+      "orch_applied": 540,
+      "orch_deferred": 118,
+      "orch_duplicate": 137,
+      "orch_stale": 6
+    },
+    "quiesce_ns": 13178445625,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "api.after_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 1,
+      "COMPLETED": 121,
+      "REFUNDED": 43,
       "REJECTED": 37
     },
     "consumer_results": {
-      "ledger_applied": 547,
-      "ledger_deferred": 106,
-      "ledger_duplicate": 59,
-      "ledger_replayed": 44,
-      "orch_applied": 219,
-      "orch_deferred": 71,
-      "orch_duplicate": 103,
-      "orch_stale": 6
+      "ledger_applied": 574,
+      "ledger_deferred": 85,
+      "ledger_duplicate": 63,
+      "ledger_replayed": 34,
+      "orch_applied": 567,
+      "orch_deferred": 85,
+      "orch_duplicate": 110
     },
-    "quiesce_ns": 17683798875,
+    "quiesce_ns": 12769722666,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.before_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 3,
+      "COMPLETED": 113,
+      "REFUNDED": 55,
+      "REJECTED": 30
+    },
+    "consumer_results": {
+      "ledger_applied": 595,
+      "ledger_deferred": 131,
+      "ledger_duplicate": 68,
+      "ledger_replayed": 72,
+      "orch_applied": 585,
+      "orch_deferred": 131,
+      "orch_duplicate": 148,
+      "orch_stale": 3
+    },
+    "quiesce_ns": 17707421083,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.before_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 12,
+      "COMPLETED": 89,
+      "REFUNDED": 44,
+      "REJECTED": 56
+    },
+    "consumer_results": {
+      "ledger_applied": 523,
+      "ledger_deferred": 125,
+      "ledger_duplicate": 67,
+      "ledger_replayed": 77,
+      "orch_applied": 507,
+      "orch_deferred": 125,
+      "orch_duplicate": 135,
+      "orch_stale": 12
+    },
+    "quiesce_ns": 18685546583,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.before_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 9,
+      "COMPLETED": 120,
+      "REFUNDED": 53,
+      "REJECTED": 20
+    },
+    "consumer_results": {
+      "ledger_applied": 610,
+      "ledger_deferred": 138,
+      "ledger_duplicate": 62,
+      "ledger_replayed": 79,
+      "orch_applied": 600,
+      "orch_deferred": 138,
+      "orch_duplicate": 145,
+      "orch_stale": 9
+    },
+    "quiesce_ns": 12637466792,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.before_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 5,
+      "COMPLETED": 109,
+      "REFUNDED": 43,
+      "REJECTED": 44
+    },
+    "consumer_results": {
+      "ledger_applied": 553,
+      "ledger_deferred": 125,
+      "ledger_duplicate": 63,
+      "ledger_replayed": 67,
+      "orch_applied": 540,
+      "orch_deferred": 125,
+      "orch_duplicate": 132,
+      "orch_stale": 5
+    },
+    "quiesce_ns": 17825367667,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.before_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 11,
+      "COMPLETED": 104,
+      "REFUNDED": 40,
+      "REJECTED": 46
+    },
+    "consumer_results": {
+      "ledger_applied": 540,
+      "ledger_deferred": 142,
+      "ledger_duplicate": 89,
+      "ledger_replayed": 276,
+      "orch_applied": 524,
+      "orch_deferred": 142,
+      "orch_duplicate": 361,
+      "orch_stale": 11
+    },
+    "quiesce_ns": 18624396542,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.after_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 9,
+      "COMPLETED": 102,
+      "REFUNDED": 54,
+      "REJECTED": 36
+    },
+    "consumer_results": {
+      "ledger_applied": 576,
+      "ledger_deferred": 129,
+      "ledger_duplicate": 56,
+      "ledger_replayed": 65,
+      "orch_applied": 559,
+      "orch_deferred": 129,
+      "orch_duplicate": 136,
+      "orch_stale": 9
+    },
+    "quiesce_ns": 9590388666,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.after_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 18,
+      "COMPLETED": 92,
+      "REFUNDED": 41,
+      "REJECTED": 50
+    },
+    "consumer_results": {
+      "ledger_applied": 526,
+      "ledger_deferred": 147,
+      "ledger_duplicate": 63,
+      "ledger_replayed": 90,
+      "orch_applied": 503,
+      "orch_deferred": 147,
+      "orch_duplicate": 164,
+      "orch_stale": 18
+    },
+    "quiesce_ns": 18483432625,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.after_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 16,
+      "COMPLETED": 112,
+      "REFUNDED": 52,
+      "REJECTED": 22
+    },
+    "consumer_results": {
+      "ledger_applied": 598,
+      "ledger_deferred": 149,
+      "ledger_duplicate": 74,
+      "ledger_replayed": 94,
+      "orch_applied": 580,
+      "orch_deferred": 149,
+      "orch_duplicate": 161,
+      "orch_stale": 16
+    },
+    "quiesce_ns": 13129501875,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.after_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 8,
+      "COMPLETED": 109,
+      "REFUNDED": 39,
+      "REJECTED": 45
+    },
+    "consumer_results": {
+      "ledger_applied": 544,
+      "ledger_deferred": 122,
+      "ledger_duplicate": 61,
+      "ledger_replayed": 68,
+      "orch_applied": 525,
+      "orch_deferred": 122,
+      "orch_duplicate": 143,
+      "orch_stale": 8
+    },
+    "quiesce_ns": 13245360292,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.reply.after_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 11,
+      "COMPLETED": 112,
+      "REFUNDED": 40,
+      "REJECTED": 38
+    },
+    "consumer_results": {
+      "ledger_applied": 556,
+      "ledger_deferred": 126,
+      "ledger_duplicate": 65,
+      "ledger_replayed": 76,
+      "orch_applied": 539,
+      "orch_deferred": 126,
+      "orch_duplicate": 150,
+      "orch_stale": 11
+    },
+    "quiesce_ns": 13383987166,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.timeout.before_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 2,
+      "COMPLETED": 109,
+      "REFUNDED": 53,
+      "REJECTED": 37
+    },
+    "consumer_results": {
+      "ledger_applied": 580,
+      "ledger_deferred": 113,
+      "ledger_duplicate": 57,
+      "ledger_replayed": 52,
+      "orch_applied": 486,
+      "orch_deferred": 113,
+      "orch_duplicate": 122,
+      "orch_stale": 2
+    },
+    "quiesce_ns": 19762168666,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.timeout.before_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 1,
+      "COMPLETED": 99,
+      "REFUNDED": 44,
+      "REJECTED": 57
+    },
+    "consumer_results": {
+      "ledger_applied": 532,
+      "ledger_deferred": 102,
+      "ledger_duplicate": 58,
+      "ledger_replayed": 45,
+      "orch_applied": 463,
+      "orch_deferred": 102,
+      "orch_duplicate": 146,
+      "orch_stale": 1
+    },
+    "quiesce_ns": 9776846625,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.timeout.before_commit",
+    "process": "orchestrator",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 23,
+      "COMPLETED": 105,
+      "REFUNDED": 53,
+      "REJECTED": 21
+    },
+    "consumer_results": {
+      "ledger_applied": 594,
+      "ledger_deferred": 130,
+      "ledger_duplicate": 65,
+      "ledger_replayed": 78,
+      "orch_applied": 570,
+      "orch_deferred": 130,
+      "orch_duplicate": 143,
+      "orch_stale": 23
+    },
+    "quiesce_ns": 13088706417,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "orch.timeout.before_commit",
+    "process": "orchestrator",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 3,
+      "COMPLETED": 112,
+      "REFUNDED": 44,
+      "REJECTED": 42
+    },
+    "consumer_results": {
+      "ledger_applied": 560,
+      "ledger_deferred": 91,
+      "ledger_duplicate": 57,
+      "ledger_replayed": 38,
+      "orch_applied": 274,
+      "orch_deferred": 62,
+      "orch_duplicate": 64,
+      "orch_stale": 3
+    },
+    "quiesce_ns": 17110978500,
     "problems": null,
     "pass": true
   },
@@ -842,22 +849,20 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 147,
-      "REFUNDED": 20,
-      "REJECTED": 33
+      "COMPLETED": 115,
+      "REFUNDED": 44,
+      "REJECTED": 42
     },
     "consumer_results": {
-      "ledger_applied": 556,
-      "ledger_deferred": 87,
-      "ledger_duplicate": 70,
-      "ledger_replayed": 27,
-      "orch_applied": 406,
-      "orch_deferred": 87,
-      "orch_duplicate": 107,
-      "orch_stale": 1
+      "ledger_applied": 563,
+      "ledger_deferred": 96,
+      "ledger_duplicate": 54,
+      "ledger_replayed": 36,
+      "orch_applied": 458,
+      "orch_deferred": 96,
+      "orch_duplicate": 88
     },
-    "quiesce_ns": 15862746500,
+    "quiesce_ns": 9649902334,
     "problems": null,
     "pass": true
   },
@@ -871,22 +876,22 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 78,
-      "COMPLETED": 85,
-      "REFUNDED": 16,
-      "REJECTED": 22
+      "CANCELLED": 92,
+      "COMPLETED": 54,
+      "REFUNDED": 32,
+      "REJECTED": 23
     },
     "consumer_results": {
       "ledger_applied": 490,
-      "ledger_deferred": 85,
-      "ledger_duplicate": 70,
-      "ledger_replayed": 219,
-      "orch_applied": 419,
-      "orch_deferred": 86,
-      "orch_duplicate": 291,
-      "orch_stale": 78
+      "ledger_deferred": 60,
+      "ledger_duplicate": 74,
+      "ledger_replayed": 238,
+      "orch_applied": 405,
+      "orch_deferred": 60,
+      "orch_duplicate": 309,
+      "orch_stale": 92
     },
-    "quiesce_ns": 11041152292,
+    "quiesce_ns": 10257297042,
     "problems": null,
     "pass": true
   },
@@ -900,22 +905,22 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 86,
-      "COMPLETED": 81,
-      "REFUNDED": 12,
-      "REJECTED": 22
+      "CANCELLED": 89,
+      "COMPLETED": 57,
+      "REFUNDED": 22,
+      "REJECTED": 33
     },
     "consumer_results": {
-      "ledger_applied": 481,
-      "ledger_deferred": 134,
-      "ledger_duplicate": 76,
-      "ledger_replayed": 264,
-      "orch_applied": 399,
-      "orch_deferred": 134,
-      "orch_duplicate": 336,
-      "orch_stale": 86
+      "ledger_applied": 466,
+      "ledger_deferred": 106,
+      "ledger_duplicate": 81,
+      "ledger_replayed": 275,
+      "orch_applied": 381,
+      "orch_deferred": 107,
+      "orch_duplicate": 347,
+      "orch_stale": 89
     },
-    "quiesce_ns": 20941885625,
+    "quiesce_ns": 16095089917,
     "problems": null,
     "pass": true
   },
@@ -929,22 +934,22 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 17,
-      "COMPLETED": 141,
-      "REFUNDED": 18,
+      "CANCELLED": 21,
+      "COMPLETED": 106,
+      "REFUNDED": 49,
       "REJECTED": 25
     },
     "consumer_results": {
-      "ledger_applied": 553,
-      "ledger_deferred": 187,
-      "ledger_duplicate": 63,
-      "ledger_replayed": 119,
-      "orch_applied": 537,
-      "orch_deferred": 187,
-      "orch_duplicate": 181,
-      "orch_stale": 17
+      "ledger_applied": 580,
+      "ledger_deferred": 145,
+      "ledger_duplicate": 64,
+      "ledger_replayed": 88,
+      "orch_applied": 560,
+      "orch_deferred": 145,
+      "orch_duplicate": 143,
+      "orch_stale": 21
     },
-    "quiesce_ns": 18103794167,
+    "quiesce_ns": 15124075584,
     "problems": null,
     "pass": true
   },
@@ -958,22 +963,22 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 78,
-      "COMPLETED": 85,
-      "REFUNDED": 16,
-      "REJECTED": 22
+      "CANCELLED": 85,
+      "COMPLETED": 63,
+      "REFUNDED": 25,
+      "REJECTED": 28
     },
     "consumer_results": {
-      "ledger_applied": 489,
-      "ledger_deferred": 82,
-      "ledger_duplicate": 85,
-      "ledger_replayed": 237,
-      "orch_applied": 419,
-      "orch_deferred": 83,
-      "orch_duplicate": 319,
-      "orch_stale": 78
+      "ledger_applied": 479,
+      "ledger_deferred": 133,
+      "ledger_duplicate": 81,
+      "ledger_replayed": 283,
+      "orch_applied": 402,
+      "orch_deferred": 133,
+      "orch_duplicate": 349,
+      "orch_stale": 85
     },
-    "quiesce_ns": 10246472959,
+    "quiesce_ns": 15951154500,
     "problems": null,
     "pass": true
   },
@@ -987,22 +992,22 @@
     "kills": 1,
     "keys": 201,
     "states": {
-      "CANCELLED": 77,
-      "COMPLETED": 89,
-      "REFUNDED": 13,
-      "REJECTED": 22
+      "CANCELLED": 84,
+      "COMPLETED": 67,
+      "REFUNDED": 25,
+      "REJECTED": 25
     },
     "consumer_results": {
-      "ledger_applied": 490,
-      "ledger_deferred": 141,
-      "ledger_duplicate": 89,
-      "ledger_replayed": 249,
-      "orch_applied": 418,
-      "orch_deferred": 141,
-      "orch_duplicate": 334,
-      "orch_stale": 77
+      "ledger_applied": 489,
+      "ledger_deferred": 118,
+      "ledger_duplicate": 85,
+      "ledger_replayed": 276,
+      "orch_applied": 410,
+      "orch_deferred": 118,
+      "orch_duplicate": 353,
+      "orch_stale": 84
     },
-    "quiesce_ns": 16083629083,
+    "quiesce_ns": 15741652167,
     "problems": null,
     "pass": true
   },
@@ -1013,717 +1018,720 @@
     "seed": 1,
     "hit": 8,
     "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 133,
+      "COMPLETED": 36,
+      "REFUNDED": 23,
+      "REJECTED": 9
+    },
+    "consumer_results": {
+      "ledger_applied": 467,
+      "ledger_deferred": 130,
+      "ledger_duplicate": 94,
+      "ledger_replayed": 446,
+      "orch_applied": 342,
+      "orch_deferred": 130,
+      "orch_duplicate": 544,
+      "orch_stale": 133
+    },
+    "quiesce_ns": 11428834584,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "ledger.after_commit",
+    "process": "ledger",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 178,
+      "COMPLETED": 9,
+      "REFUNDED": 7,
+      "REJECTED": 7
+    },
+    "consumer_results": {
+      "ledger_applied": 413,
+      "ledger_deferred": 127,
+      "ledger_duplicate": 102,
+      "ledger_replayed": 566,
+      "orch_applied": 240,
+      "orch_deferred": 127,
+      "orch_duplicate": 660,
+      "orch_stale": 178
+    },
+    "quiesce_ns": 16132297333,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "ledger.after_commit",
+    "process": "ledger",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 26,
+      "COMPLETED": 102,
+      "REFUNDED": 52,
+      "REJECTED": 21
+    },
+    "consumer_results": {
+      "ledger_applied": 585,
+      "ledger_deferred": 152,
+      "ledger_duplicate": 68,
+      "ledger_replayed": 94,
+      "orch_applied": 561,
+      "orch_deferred": 152,
+      "orch_duplicate": 160,
+      "orch_stale": 26
+    },
+    "quiesce_ns": 15870269125,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "ledger.after_commit",
+    "process": "ledger",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 139,
+      "COMPLETED": 45,
+      "REFUNDED": 7,
+      "REJECTED": 10
+    },
+    "consumer_results": {
+      "ledger_applied": 442,
+      "ledger_deferred": 125,
+      "ledger_duplicate": 99,
+      "ledger_replayed": 449,
+      "orch_applied": 312,
+      "orch_deferred": 125,
+      "orch_duplicate": 537,
+      "orch_stale": 139
+    },
+    "quiesce_ns": 15284734750,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "ledger.after_commit",
+    "process": "ledger",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
     "kills": 1,
     "keys": 201,
     "states": {
       "CANCELLED": 71,
-      "COMPLETED": 88,
-      "REFUNDED": 21,
-      "REJECTED": 21
-    },
-    "consumer_results": {
-      "ledger_applied": 503,
-      "ledger_deferred": 63,
-      "ledger_duplicate": 66,
-      "ledger_replayed": 188,
-      "orch_applied": 440,
-      "orch_deferred": 63,
-      "orch_duplicate": 248,
-      "orch_stale": 71
-    },
-    "quiesce_ns": 6210149125,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "ledger.after_commit",
-    "process": "ledger",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 52,
-      "COMPLETED": 105,
-      "REFUNDED": 18,
-      "REJECTED": 26
-    },
-    "consumer_results": {
-      "ledger_applied": 512,
-      "ledger_deferred": 102,
-      "ledger_duplicate": 78,
-      "ledger_replayed": 168,
-      "orch_applied": 465,
-      "orch_deferred": 102,
-      "orch_duplicate": 242,
-      "orch_stale": 52
-    },
-    "quiesce_ns": 10235666041,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "ledger.after_commit",
-    "process": "ledger",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 7,
-      "COMPLETED": 149,
-      "REFUNDED": 18,
-      "REJECTED": 27
-    },
-    "consumer_results": {
-      "ledger_applied": 558,
-      "ledger_deferred": 107,
-      "ledger_duplicate": 58,
-      "ledger_replayed": 69,
-      "orch_applied": 553,
-      "orch_deferred": 107,
-      "orch_duplicate": 123,
-      "orch_stale": 7
-    },
-    "quiesce_ns": 11447700792,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "ledger.after_commit",
-    "process": "ledger",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 76,
-      "COMPLETED": 86,
-      "REFUNDED": 15,
-      "REJECTED": 24
-    },
-    "consumer_results": {
-      "ledger_applied": 485,
-      "ledger_deferred": 72,
-      "ledger_duplicate": 72,
-      "ledger_replayed": 208,
-      "orch_applied": 418,
-      "orch_deferred": 72,
-      "orch_duplicate": 286,
-      "orch_stale": 76
-    },
-    "quiesce_ns": 10238599667,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "ledger.after_commit",
-    "process": "ledger",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 57,
-      "COMPLETED": 105,
-      "REFUNDED": 15,
-      "REJECTED": 24
-    },
-    "consumer_results": {
-      "ledger_applied": 507,
-      "ledger_deferred": 81,
-      "ledger_duplicate": 77,
-      "ledger_replayed": 171,
-      "orch_applied": 456,
-      "orch_deferred": 81,
-      "orch_duplicate": 238,
-      "orch_stale": 57
-    },
-    "quiesce_ns": 15277082417,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.before_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 2,
-      "COMPLETED": 146,
-      "REFUNDED": 21,
-      "REJECTED": 32
-    },
-    "consumer_results": {
-      "ledger_applied": 558,
-      "ledger_deferred": 70,
-      "ledger_duplicate": 54,
-      "ledger_replayed": 51,
-      "orch_applied": 556,
-      "orch_deferred": 70,
-      "orch_duplicate": 112,
-      "orch_stale": 2
-    },
-    "quiesce_ns": 6209631542,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.before_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 140,
-      "REFUNDED": 22,
-      "REJECTED": 38
-    },
-    "consumer_results": {
-      "ledger_applied": 548,
-      "ledger_deferred": 91,
-      "ledger_duplicate": 61,
-      "ledger_replayed": 30,
-      "orch_applied": 547,
-      "orch_deferred": 91,
-      "orch_duplicate": 92,
-      "orch_stale": 1
-    },
-    "quiesce_ns": 6207133083,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.before_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 2,
-      "COMPLETED": 155,
-      "REFUNDED": 17,
-      "REJECTED": 27
-    },
-    "consumer_results": {
-      "ledger_applied": 564,
-      "ledger_deferred": 100,
-      "ledger_duplicate": 55,
-      "ledger_replayed": 39,
-      "orch_applied": 562,
-      "orch_deferred": 100,
-      "orch_duplicate": 92,
-      "orch_stale": 2
-    },
-    "quiesce_ns": 6209815416,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.before_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 143,
-      "REFUNDED": 26,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 566,
-      "ledger_deferred": 79,
-      "ledger_duplicate": 58,
-      "ledger_replayed": 57,
-      "orch_applied": 565,
-      "orch_deferred": 79,
-      "orch_duplicate": 117,
-      "orch_stale": 1
-    },
-    "quiesce_ns": 6409973042,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.before_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 2,
-      "COMPLETED": 155,
-      "REFUNDED": 22,
-      "REJECTED": 22
-    },
-    "consumer_results": {
-      "ledger_applied": 579,
-      "ledger_deferred": 98,
-      "ledger_duplicate": 68,
-      "ledger_replayed": 37,
-      "orch_applied": 577,
-      "orch_deferred": 98,
-      "orch_duplicate": 104,
-      "orch_stale": 2
-    },
-    "quiesce_ns": 6208078833,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.after_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 3,
-      "COMPLETED": 144,
-      "REFUNDED": 24,
-      "REJECTED": 30
-    },
-    "consumer_results": {
-      "ledger_applied": 564,
-      "ledger_deferred": 69,
-      "ledger_duplicate": 56,
-      "ledger_replayed": 45,
-      "orch_applied": 561,
-      "orch_deferred": 69,
-      "orch_duplicate": 108,
-      "orch_stale": 3
-    },
-    "quiesce_ns": 6408825417,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.after_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 3,
-      "COMPLETED": 145,
-      "REFUNDED": 21,
-      "REJECTED": 32
-    },
-    "consumer_results": {
-      "ledger_applied": 557,
-      "ledger_deferred": 86,
-      "ledger_duplicate": 56,
-      "ledger_replayed": 28,
-      "orch_applied": 554,
-      "orch_deferred": 86,
-      "orch_duplicate": 90,
-      "orch_stale": 3
-    },
-    "quiesce_ns": 6208212417,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.after_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 4,
-      "COMPLETED": 155,
-      "REFUNDED": 17,
+      "COMPLETED": 76,
+      "REFUNDED": 29,
       "REJECTED": 25
     },
     "consumer_results": {
-      "ledger_applied": 566,
-      "ledger_deferred": 98,
-      "ledger_duplicate": 62,
-      "ledger_replayed": 37,
-      "orch_applied": 562,
-      "orch_deferred": 98,
-      "orch_duplicate": 93,
-      "orch_stale": 4
-    },
-    "quiesce_ns": 6209259083,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.after_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 144,
-      "REFUNDED": 25,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 565,
-      "ledger_deferred": 92,
-      "ledger_duplicate": 64,
-      "ledger_replayed": 55,
-      "orch_applied": 564,
-      "orch_deferred": 92,
-      "orch_duplicate": 115,
-      "orch_stale": 1
-    },
-    "quiesce_ns": 6411528833,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.poll.after_publish",
-    "process": "relay-poll",
-    "relay": "poll",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 1,
-      "COMPLETED": 157,
-      "REFUNDED": 22,
-      "REJECTED": 21
-    },
-    "consumer_results": {
-      "ledger_applied": 582,
-      "ledger_deferred": 116,
-      "ledger_duplicate": 67,
-      "ledger_replayed": 47,
-      "orch_applied": 581,
-      "orch_deferred": 116,
-      "orch_duplicate": 118,
-      "orch_stale": 1
-    },
-    "quiesce_ns": 10240771000,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.handler",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 1,
-    "hit": 8,
-    "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 11,
-      "COMPLETED": 135,
-      "REFUNDED": 24,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 554,
-      "ledger_deferred": 92,
-      "ledger_duplicate": 62,
-      "ledger_replayed": 95,
-      "orch_applied": 543,
-      "orch_deferred": 92,
-      "orch_duplicate": 164,
-      "orch_stale": 11
-    },
-    "quiesce_ns": 6209010625,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.handler",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "COMPLETED": 143,
-      "REFUNDED": 24,
-      "REJECTED": 34
-    },
-    "consumer_results": {
-      "ledger_applied": 559,
-      "ledger_deferred": 87,
-      "ledger_duplicate": 67,
-      "ledger_replayed": 29,
-      "orch_applied": 559,
-      "orch_deferred": 87,
-      "orch_duplicate": 97
-    },
-    "quiesce_ns": 6208050333,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.handler",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 3,
-      "COMPLETED": 153,
-      "REFUNDED": 18,
-      "REJECTED": 27
-    },
-    "consumer_results": {
-      "ledger_applied": 564,
-      "ledger_deferred": 91,
-      "ledger_duplicate": 53,
-      "ledger_replayed": 31,
-      "orch_applied": 561,
-      "orch_deferred": 91,
-      "orch_duplicate": 85,
-      "orch_stale": 3
-    },
-    "quiesce_ns": 6209896250,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.handler",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 13,
-      "COMPLETED": 136,
-      "REFUNDED": 21,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 549,
+      "ledger_applied": 505,
       "ledger_deferred": 100,
-      "ledger_duplicate": 60,
-      "ledger_replayed": 100,
-      "orch_applied": 536,
+      "ledger_duplicate": 90,
+      "ledger_replayed": 229,
+      "orch_applied": 440,
       "orch_deferred": 100,
-      "orch_duplicate": 166,
-      "orch_stale": 13
+      "orch_duplicate": 310,
+      "orch_stale": 71
     },
-    "quiesce_ns": 6212070291,
+    "quiesce_ns": 10636352958,
     "problems": null,
     "pass": true
   },
   {
-    "point": "relay.cdc.handler",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 3,
-      "COMPLETED": 154,
-      "REFUNDED": 22,
-      "REJECTED": 22
-    },
-    "consumer_results": {
-      "ledger_applied": 578,
-      "ledger_deferred": 103,
-      "ledger_duplicate": 69,
-      "ledger_replayed": 41,
-      "orch_applied": 575,
-      "orch_deferred": 103,
-      "orch_duplicate": 115,
-      "orch_stale": 3
-    },
-    "quiesce_ns": 6414995917,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.after_publish",
-    "process": "relay-cdc",
-    "relay": "cdc",
+    "point": "relay.poll.before_publish",
+    "process": "relay-poll",
+    "relay": "poll",
     "seed": 1,
     "hit": 8,
     "restart_delay_ns": 2050000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 7,
-      "COMPLETED": 140,
-      "REFUNDED": 23,
-      "REJECTED": 31
-    },
-    "consumer_results": {
-      "ledger_applied": 557,
-      "ledger_deferred": 85,
-      "ledger_duplicate": 69,
-      "ledger_replayed": 93,
-      "orch_applied": 550,
-      "orch_deferred": 85,
-      "orch_duplicate": 161,
-      "orch_stale": 7
-    },
-    "quiesce_ns": 6411150833,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.after_publish",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 2,
-    "hit": 5,
-    "restart_delay_ns": 1300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 3,
-      "COMPLETED": 142,
-      "REFUNDED": 22,
-      "REJECTED": 34
-    },
-    "consumer_results": {
-      "ledger_applied": 554,
-      "ledger_deferred": 99,
-      "ledger_duplicate": 62,
-      "ledger_replayed": 35,
-      "orch_applied": 551,
-      "orch_deferred": 99,
-      "orch_duplicate": 96,
-      "orch_stale": 3
-    },
-    "quiesce_ns": 6211449958,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.after_publish",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 3,
-    "hit": 2,
-    "restart_delay_ns": 550000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "COMPLETED": 155,
-      "REFUNDED": 18,
-      "REJECTED": 28
-    },
-    "consumer_results": {
-      "ledger_applied": 565,
-      "ledger_deferred": 85,
-      "ledger_duplicate": 55,
-      "ledger_replayed": 31,
-      "orch_applied": 565,
-      "orch_deferred": 85,
-      "orch_duplicate": 87
-    },
-    "quiesce_ns": 6410324750,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.after_publish",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 4,
-    "hit": 9,
-    "restart_delay_ns": 2300000000,
-    "kills": 1,
-    "keys": 201,
-    "states": {
-      "CANCELLED": 9,
-      "COMPLETED": 138,
-      "REFUNDED": 21,
-      "REJECTED": 33
-    },
-    "consumer_results": {
-      "ledger_applied": 549,
-      "ledger_deferred": 105,
-      "ledger_duplicate": 70,
-      "ledger_replayed": 118,
-      "orch_applied": 540,
-      "orch_deferred": 105,
-      "orch_duplicate": 191,
-      "orch_stale": 9
-    },
-    "quiesce_ns": 6209497333,
-    "problems": null,
-    "pass": true
-  },
-  {
-    "point": "relay.cdc.after_publish",
-    "process": "relay-cdc",
-    "relay": "cdc",
-    "seed": 5,
-    "hit": 6,
-    "restart_delay_ns": 1550000000,
     "kills": 1,
     "keys": 201,
     "states": {
       "CANCELLED": 2,
-      "COMPLETED": 155,
-      "REFUNDED": 22,
+      "COMPLETED": 114,
+      "REFUNDED": 55,
+      "REJECTED": 30
+    },
+    "consumer_results": {
+      "ledger_applied": 596,
+      "ledger_deferred": 82,
+      "ledger_duplicate": 55,
+      "ledger_replayed": 51,
+      "orch_applied": 594,
+      "orch_deferred": 82,
+      "orch_duplicate": 109,
+      "orch_stale": 2
+    },
+    "quiesce_ns": 6635049334,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.before_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 2,
+      "COMPLETED": 100,
+      "REFUNDED": 51,
+      "REJECTED": 48
+    },
+    "consumer_results": {
+      "ledger_applied": 556,
+      "ledger_deferred": 82,
+      "ledger_duplicate": 55,
+      "ledger_replayed": 39,
+      "orch_applied": 554,
+      "orch_deferred": 82,
+      "orch_duplicate": 113,
+      "orch_stale": 2
+    },
+    "quiesce_ns": 6894416083,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.before_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 1,
+      "COMPLETED": 120,
+      "REFUNDED": 57,
+      "REJECTED": 23
+    },
+    "consumer_results": {
+      "ledger_applied": 613,
+      "ledger_deferred": 100,
+      "ledger_duplicate": 65,
+      "ledger_replayed": 37,
+      "orch_applied": 612,
+      "orch_deferred": 100,
+      "orch_duplicate": 101,
+      "orch_stale": 1
+    },
+    "quiesce_ns": 6665088208,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.before_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 7,
+      "COMPLETED": 105,
+      "REFUNDED": 40,
+      "REJECTED": 49
+    },
+    "consumer_results": {
+      "ledger_applied": 538,
+      "ledger_deferred": 104,
+      "ledger_duplicate": 77,
+      "ledger_replayed": 253,
+      "orch_applied": 531,
+      "orch_deferred": 104,
+      "orch_duplicate": 335,
+      "orch_stale": 7
+    },
+    "quiesce_ns": 11094818250,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.before_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 5,
+      "COMPLETED": 121,
+      "REFUNDED": 45,
+      "REJECTED": 30
+    },
+    "consumer_results": {
+      "ledger_applied": 583,
+      "ledger_deferred": 119,
+      "ledger_duplicate": 71,
+      "ledger_replayed": 60,
+      "orch_applied": 578,
+      "orch_deferred": 119,
+      "orch_duplicate": 128,
+      "orch_stale": 5
+    },
+    "quiesce_ns": 10765157375,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.after_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 8,
+      "COMPLETED": 103,
+      "REFUNDED": 50,
+      "REJECTED": 40
+    },
+    "consumer_results": {
+      "ledger_applied": 565,
+      "ledger_deferred": 127,
+      "ledger_duplicate": 93,
+      "ledger_replayed": 454,
+      "orch_applied": 557,
+      "orch_deferred": 126,
+      "orch_duplicate": 551,
+      "orch_stale": 8
+    },
+    "quiesce_ns": 11671072792,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.after_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 2,
+      "COMPLETED": 101,
+      "REFUNDED": 49,
+      "REJECTED": 49
+    },
+    "consumer_results": {
+      "ledger_applied": 552,
+      "ledger_deferred": 73,
+      "ledger_duplicate": 71,
+      "ledger_replayed": 28,
+      "orch_applied": 550,
+      "orch_deferred": 73,
+      "orch_duplicate": 93,
+      "orch_stale": 2
+    },
+    "quiesce_ns": 10701483833,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.after_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 7,
+      "COMPLETED": 115,
+      "REFUNDED": 56,
+      "REJECTED": 23
+    },
+    "consumer_results": {
+      "ledger_applied": 606,
+      "ledger_deferred": 110,
+      "ledger_duplicate": 64,
+      "ledger_replayed": 60,
+      "orch_applied": 599,
+      "orch_deferred": 110,
+      "orch_duplicate": 125,
+      "orch_stale": 7
+    },
+    "quiesce_ns": 10898145500,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.after_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 5,
+      "COMPLETED": 110,
+      "REFUNDED": 42,
+      "REJECTED": 44
+    },
+    "consumer_results": {
+      "ledger_applied": 552,
+      "ledger_deferred": 126,
+      "ledger_duplicate": 65,
+      "ledger_replayed": 105,
+      "orch_applied": 547,
+      "orch_deferred": 126,
+      "orch_duplicate": 172,
+      "orch_stale": 5
+    },
+    "quiesce_ns": 10766009416,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.poll.after_publish",
+    "process": "relay-poll",
+    "relay": "poll",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 3,
+      "COMPLETED": 120,
+      "REFUNDED": 46,
+      "REJECTED": 32
+    },
+    "consumer_results": {
+      "ledger_applied": 582,
+      "ledger_deferred": 112,
+      "ledger_duplicate": 59,
+      "ledger_replayed": 55,
+      "orch_applied": 579,
+      "orch_deferred": 112,
+      "orch_duplicate": 116,
+      "orch_stale": 3
+    },
+    "quiesce_ns": 11062945125,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.handler",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 44,
+      "COMPLETED": 87,
+      "REFUNDED": 48,
       "REJECTED": 22
     },
     "consumer_results": {
-      "ledger_applied": 579,
+      "ledger_applied": 563,
+      "ledger_deferred": 139,
+      "ledger_duplicate": 82,
+      "ledger_replayed": 228,
+      "orch_applied": 519,
+      "orch_deferred": 139,
+      "orch_duplicate": 313,
+      "orch_stale": 44
+    },
+    "quiesce_ns": 9843691833,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.handler",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 7,
+      "COMPLETED": 97,
+      "REFUNDED": 50,
+      "REJECTED": 48
+    },
+    "consumer_results": {
+      "ledger_applied": 553,
       "ledger_deferred": 97,
-      "ledger_duplicate": 68,
-      "ledger_replayed": 28,
-      "orch_applied": 577,
-      "orch_deferred": 97,
-      "orch_duplicate": 98,
+      "ledger_duplicate": 59,
+      "ledger_replayed": 53,
+      "orch_applied": 546,
+      "orch_deferred": 98,
+      "orch_duplicate": 118,
+      "orch_stale": 7
+    },
+    "quiesce_ns": 15590790750,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.handler",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 14,
+      "COMPLETED": 116,
+      "REFUNDED": 53,
+      "REJECTED": 18
+    },
+    "consumer_results": {
+      "ledger_applied": 606,
+      "ledger_deferred": 171,
+      "ledger_duplicate": 71,
+      "ledger_replayed": 98,
+      "orch_applied": 592,
+      "orch_deferred": 171,
+      "orch_duplicate": 170,
+      "orch_stale": 14
+    },
+    "quiesce_ns": 17909589750,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.handler",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 159,
+      "COMPLETED": 26,
+      "REFUNDED": 7,
+      "REJECTED": 9
+    },
+    "consumer_results": {
+      "ledger_applied": 433,
+      "ledger_deferred": 180,
+      "ledger_duplicate": 140,
+      "ledger_replayed": 905,
+      "orch_applied": 274,
+      "orch_deferred": 180,
+      "orch_duplicate": 1052,
+      "orch_stale": 159
+    },
+    "quiesce_ns": 30314184834,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.handler",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 92,
+      "COMPLETED": 67,
+      "REFUNDED": 25,
+      "REJECTED": 17
+    },
+    "consumer_results": {
+      "ledger_applied": 502,
+      "ledger_deferred": 144,
+      "ledger_duplicate": 101,
+      "ledger_replayed": 468,
+      "orch_applied": 410,
+      "orch_deferred": 144,
+      "orch_duplicate": 575,
+      "orch_stale": 92
+    },
+    "quiesce_ns": 19888384208,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.after_publish",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 1,
+    "hit": 8,
+    "restart_delay_ns": 2050000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 187,
+      "COMPLETED": 12,
+      "REFUNDED": 2
+    },
+    "consumer_results": {
+      "ledger_applied": 418,
+      "ledger_deferred": 108,
+      "ledger_duplicate": 109,
+      "ledger_replayed": 680,
+      "orch_applied": 231,
+      "orch_deferred": 108,
+      "orch_duplicate": 784,
+      "orch_stale": 187
+    },
+    "quiesce_ns": 18785809416,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.after_publish",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 2,
+    "hit": 5,
+    "restart_delay_ns": 1300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 32,
+      "COMPLETED": 84,
+      "REFUNDED": 39,
+      "REJECTED": 46
+    },
+    "consumer_results": {
+      "ledger_applied": 518,
+      "ledger_deferred": 123,
+      "ledger_duplicate": 107,
+      "ledger_replayed": 422,
+      "orch_applied": 486,
+      "orch_deferred": 123,
+      "orch_duplicate": 530,
+      "orch_stale": 32
+    },
+    "quiesce_ns": 12936787708,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.after_publish",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 3,
+    "hit": 2,
+    "restart_delay_ns": 550000000,
+    "kills": 1,
+    "keys": 202,
+    "states": {
+      "CANCELLED": 3,
+      "COMPLETED": 121,
+      "REFUNDED": 56,
+      "REJECTED": 22
+    },
+    "consumer_results": {
+      "ledger_applied": 614,
+      "ledger_deferred": 119,
+      "ledger_duplicate": 64,
+      "ledger_replayed": 57,
+      "orch_applied": 612,
+      "orch_deferred": 119,
+      "orch_duplicate": 118,
       "orch_stale": 2
     },
-    "quiesce_ns": 6209934459,
+    "quiesce_ns": 10793356958,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.after_publish",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 4,
+    "hit": 9,
+    "restart_delay_ns": 2300000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 38,
+      "COMPLETED": 89,
+      "REFUNDED": 32,
+      "REJECTED": 42
+    },
+    "consumer_results": {
+      "ledger_applied": 513,
+      "ledger_deferred": 146,
+      "ledger_duplicate": 105,
+      "ledger_replayed": 443,
+      "orch_applied": 475,
+      "orch_deferred": 146,
+      "orch_duplicate": 552,
+      "orch_stale": 38
+    },
+    "quiesce_ns": 11024998875,
+    "problems": null,
+    "pass": true
+  },
+  {
+    "point": "relay.cdc.after_publish",
+    "process": "relay-cdc",
+    "relay": "cdc",
+    "seed": 5,
+    "hit": 6,
+    "restart_delay_ns": 1550000000,
+    "kills": 1,
+    "keys": 201,
+    "states": {
+      "CANCELLED": 19,
+      "COMPLETED": 108,
+      "REFUNDED": 40,
+      "REJECTED": 34
+    },
+    "consumer_results": {
+      "ledger_applied": 556,
+      "ledger_deferred": 134,
+      "ledger_duplicate": 92,
+      "ledger_replayed": 229,
+      "orch_applied": 537,
+      "orch_deferred": 134,
+      "orch_duplicate": 326,
+      "orch_stale": 19
+    },
+    "quiesce_ns": 10967111125,
     "problems": null,
     "pass": true
   }
