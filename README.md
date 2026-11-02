@@ -12,10 +12,11 @@ boundary and then audits the books.
 | claim | evidence |
 |---|---|
 | Money is conserved and nothing is applied twice, under any delivery order, duplication or loss | property test: rapid drives the real state machine and ledger decision function through adversarial schedules (`internal/sim`) |
-| …and under real crashes | [crash matrix](docs/chaos-matrix.md): 11 crash points × 5 seeds + 5 no-crash baselines = **60/60 runs pass**, 12,067 transfers, 55 SIGKILLs, with duplicates, reordering and late redelivery injected on every run |
+| …and under real crashes | [crash matrix](docs/chaos-matrix.md): 11 crash points × 5 seeds + 5 no-crash baselines = **60/60 runs pass**, 12,062 transfers, 55 SIGKILLs, with duplicates, reordering and late redelivery injected on every run |
 | …and under load | every benchmark run ends with the same audit: **292,204 sagas over 7 runs, 0 violations** |
 | Money never crosses currencies | the property test draws account currencies and lets clients name the wrong one; removing the currency check from either hold or credit fails on the first schedule. Every chaos run seeds USD and EUR accounts, and the audit checks conservation per currency and that every leg is in its account's currency. A forged operation that balances but pays EUR into a USD account is reported ([ADR-0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md)) |
 | A stuck saga pages someone | `saga_stuck{state}` and `saga_oldest_open_seconds` from the orchestrator, with the `SagaStuck` and `SagaStuckDetectorAbsent` alerts tested by `promtool test rules` in CI. An integration test shows an undeliverable saga being counted. Every chaos run requires the restarted orchestrator to export the gauge and read 0 at rest ([ADR-0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md)) |
+| An account's statement adds up to its balance | `GET /accounts/{id}/statement` on the ledger, built from the journal alone. An integration test reads it in pages of 1, 3 and 1000 lines and gets the same list, which ends at the balance row and, per currency, sums to what the audit says. After every chaos run each account's statement, read in pages of 7 through the possibly restarted ledger, must do the same ([ADR-0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md)) |
 | The harness can see a bug | removing the one `if` that fences a late hold makes 6 of 8 runs fail; the harness had to be changed before it could see it ([ADR-0007](docs/adr/0007-crash-harness-real-processes-sigkill-at-named-points.md)) |
 | No data races | `go test -race` on every package, unit and integration; one seed of the crash matrix on race-enabled binaries of all three services: 12/12 runs, 0 race reports (CI repeats this on every push) |
 | Each idempotency layer holds on its own boundary | Testcontainers tests on Postgres 17 + Kafka 3.9: 32 concurrent POSTs with one key create one transfer; a poison message goes to the DLQ and the partition moves on; a retried hold replays the original refusal after the account is topped up |
@@ -34,7 +35,7 @@ two consumers), not the POST.
 | recovery after SIGKILL, process down 5–10 s, 100 clients | backlog accepted before the restart is terminal **0.7 s** after restart (ledger), **0.5 s** (orchestrator), **3.2 s** (relay); 0 transfers cancelled; 0 violations |
 | outbox → consumer delivery, 100 clients | p50 16–23 ms, p99 62–85 ms, CDC and poller alike |
 | database cost at idle | poller +178 transactions/s, CDC +1 |
-| crash matrix wall time | 8 min 14 s for 60 runs, 4 in parallel, on a Docker VM shared with other jobs |
+| crash matrix wall time | 6 min 57 s for 60 runs, 4 in parallel |
 
 Per-run tables: [CDC vs poller (ADR-0004)](docs/adr/0004-transactional-outbox-cdc-and-poller.md#measurements),
 [crash matrix](docs/chaos-matrix.md).
@@ -81,7 +82,7 @@ flowchart LR
 - **Ledger** (`internal/ledger`): executes one command per transaction
   against one account and its shard's clearing account, by a pure
   `Decide` function. Records every decision under `(saga, step)` and replays
-  it for duplicates.
+  it for duplicates. Serves account statements from the journal.
 - **Relay** (`internal/relay`): ships both outboxes to Kafka, either from
   the WAL with [go-pq-cdc-kafka](https://github.com/Trendyol/go-pq-cdc-kafka)
   or by polling with `FOR UPDATE SKIP LOCKED`.
@@ -108,6 +109,7 @@ in another currency).
 | [0007](docs/adr/0007-crash-harness-real-processes-sigkill-at-named-points.md) | Crash harness; how it was itself tested; what it found |
 | [0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md) | Currencies: the client names one, the ledger checks it at hold and credit, no conversion; per-currency invariants |
 | [0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md) | Stuck sagas: a periodic gauge, an alert, and an alert on the detector's absence |
+| [0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md) | Account statement from the journal; why paging by operation id is safe here |
 
 ## Reproduce
 
@@ -122,11 +124,12 @@ make up                # the stack; Grafana on :3000, Prometheus (with alerts) o
 ```
 
 Host ports are overridable (`PG_PORT`, `KAFKA_PORT`, `API_PORT`,
-`GRAFANA_PORT`, `PROMETHEUS_PORT` in `.env`) when the defaults are taken.
+`LEDGER_PORT`, `GRAFANA_PORT`, `PROMETHEUS_PORT` in `.env`) when the defaults are taken.
 
 ```bash
 curl -s -XPOST localhost:8080/transfers -H 'Idempotency-Key: k1' -d '{"from":1,"to":2,"amount":100,"currency":"USD"}'
 curl -s 'localhost:8080/transfers/<id>?wait=5s'
+curl -s 'localhost:8081/accounts/1/statement?limit=10'   # the ledger; ?after=<next> for the next page
 ```
 
 ## Layout

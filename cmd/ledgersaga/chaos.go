@@ -15,6 +15,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"maps"
 	"math/rand/v2"
 	"net/http"
 	"net/url"
@@ -238,7 +239,7 @@ func (h *harness) do(ctx context.Context, name string) error {
 		env           []string
 	}{
 		{"orchestrator", "orchestrator", []string{"HTTP_ADDR=:" + strconv.Itoa(base), "METRICS_ADDR=:" + strconv.Itoa(base+1)}},
-		{"ledger", "ledger", []string{"METRICS_ADDR=:" + strconv.Itoa(base+2)}},
+		{"ledger", "ledger", []string{"METRICS_ADDR=:" + strconv.Itoa(base+2), "HTTP_ADDR=:" + strconv.Itoa(base+5)}},
 		{"relay", "relay-" + h.Relay, []string{"METRICS_ADDR=:" + strconv.Itoa(base+3)}},
 	}
 	for _, r := range roles {
@@ -294,6 +295,7 @@ func (h *harness) do(ctx context.Context, name string) error {
 	if age, ok := gauge(fmt.Sprintf("http://localhost:%d/metrics", base+1), "saga_oldest_open_seconds"); !ok || age != 0 {
 		h.problem("at rest saga_oldest_open_seconds = %v (exported %v), want 0", age, ok)
 	}
+	h.statements(ctx, pg, fmt.Sprintf("http://localhost:%d", base+5))
 	h.Absorbed = map[string]float64{}
 	for i, port := range []int{base + 1, base + 2} {
 		for k, v := range scrape(fmt.Sprintf("http://localhost:%d/metrics", port)) {
@@ -301,6 +303,61 @@ func (h *harness) do(ctx context.Context, name string) error {
 		}
 	}
 	return nil
+}
+
+// statements walks every account's statement through the (possibly
+// restarted) ledger in pages of 7. Each line must continue the running
+// totals of the one before, the last must equal the balance row, and per
+// currency the closing balances must add up to what was opened.
+func (h *harness) statements(ctx context.Context, pg *pgxpool.Pool, ledgerURL string) {
+	got, want := map[string]int64{}, map[string]int64{}
+	for id := int64(1); id <= int64(h.accounts); id++ {
+		var avail, held int64
+		var cur string
+		if err := pg.QueryRow(ctx, `SELECT available, held, currency FROM ledger.accounts WHERE id = $1`, id).
+			Scan(&avail, &held, &cur); err != nil {
+			h.problem("account %d: %v", id, err)
+			continue
+		}
+		last, err := walkStatement(fmt.Sprintf("%s/accounts/%d/statement?limit=7", ledgerURL, id))
+		if err != nil {
+			h.problem("statement of account %d: %v", id, err)
+			continue
+		}
+		if last.AvailableAfter != avail || last.HeldAfter != held {
+			h.problem("statement of account %d ends at %d/%d, balance row %d/%d", id, last.AvailableAfter, last.HeldAfter, avail, held)
+		}
+		got[cur] += last.AvailableAfter + last.HeldAfter
+		want[ledger.SeedCurrency(id, chaosCurrencies)] += 1000
+	}
+	if !maps.Equal(got, want) {
+		h.problem("statements close at %v per currency, opened %v", got, want)
+	}
+}
+
+func walkStatement(u string) (last ledger.Line, err error) {
+	for after := int64(0); ; {
+		resp, err := http.Get(u + "&after=" + strconv.FormatInt(after, 10))
+		if err != nil {
+			return last, err
+		}
+		var s ledger.Statement
+		err = json.NewDecoder(resp.Body).Decode(&s)
+		resp.Body.Close()
+		if err != nil || resp.StatusCode != http.StatusOK {
+			return last, fmt.Errorf("status %d, %v", resp.StatusCode, err)
+		}
+		for _, l := range s.Lines {
+			if l.Op <= last.Op || l.AvailableAfter != last.AvailableAfter+l.Available || l.HeldAfter != last.HeldAfter+l.Held {
+				return last, fmt.Errorf("line %+v does not continue %+v", l, last)
+			}
+			last = l
+		}
+		if s.Next == 0 {
+			return last, nil
+		}
+		after = s.Next
+	}
 }
 
 // chaosCurrencies are the currencies of a chaos run's accounts.
@@ -695,6 +752,8 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		"nothing held at rest; every saga terminal with exactly the ledger operations its state " +
 		"allows and exactly -amount/+amount moved (completed) or nothing; every transition log is a legal path ending in the " +
 		"saga's state; one transfer per idempotency key, and a re-sent key returns the same transfer; the orchestrator's " +
-		"stuck-saga gauge is exported and reads 0.\n")
+		"stuck-saga gauge is exported and reads 0; every account's statement, read through the (possibly restarted) ledger " +
+		"in pages of 7, continues its running totals line by line, ends at the balance row and, per currency, adds up to the " +
+		"opening total.\n")
 	return b.String()
 }

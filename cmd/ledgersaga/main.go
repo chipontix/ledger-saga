@@ -293,6 +293,7 @@ func ledgerd(ctx context.Context, _ []string) error {
 	}
 	defer stop()
 	serveMetrics(ctx)
+	serve(ctx, env("HTTP_ADDR", ":8081"), ledger.Handler(p))
 	slog.Info("ledger up")
 	<-ctx.Done()
 	return nil

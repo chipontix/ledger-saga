@@ -106,6 +106,7 @@ services:
   ledger:
     <<: *app
     command: ["ledger"]
+    ports: ["${LEDGER_PORT:-8081}:8081"]
 
   relay:
     <<: *app

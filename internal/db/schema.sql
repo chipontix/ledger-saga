@@ -84,6 +84,10 @@ CREATE TABLE IF NOT EXISTS ledger.entries (
     amount     bigint NOT NULL
 );
 CREATE INDEX IF NOT EXISTS entries_by_op ON ledger.entries (op_id);
+-- Statements (GET /accounts/{id}/statement). Customer accounts only: the
+-- clearing and equity accounts get a leg in almost every operation, and an
+-- index on them would be a hot page for no reader.
+CREATE INDEX IF NOT EXISTS entries_by_account ON ledger.entries (account_id, op_id) WHERE account_id > 0;
 
 CREATE TABLE IF NOT EXISTS ledger.outbox (
     id         bigserial PRIMARY KEY,

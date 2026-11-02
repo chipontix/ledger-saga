@@ -510,3 +510,94 @@ func gauges(t *testing.T) map[string]float64 {
 	}
 	return out
 }
+
+// Statements are the journal as an account holder sees it. Read page by
+// page in any page size they are the same list, each ends at the balance
+// row, refusals do not appear, and per currency the closing balances add up
+// to the opening total, as the audit says they must.
+func TestStatementAgreesWithAudit(t *testing.T) {
+	ctx := context.Background()
+	s := newSystem(t, "poll", 12, saga.Policy{StepTimeout: 5 * time.Second, MaxBackoff: 10 * time.Second, HoldAttempts: 3})
+	for i, c := range []struct{ from, to, amount int64 }{
+		{1, 2, 100},  // completed
+		{1, 5, 50},   // USD to EUR: captured, then refunded
+		{3, 4, 5000}, // insufficient funds: rejected, posts nothing
+	} {
+		_, v := s.post(fmt.Sprintf("d%d", i), c.from, c.to, c.amount)
+		s.wait(v.ID)
+	}
+	var wg sync.WaitGroup
+	for i := range 40 { // accounts 6-12 only, so 1-5 keep the lines above
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			from, to := int64(6+i%7), int64(6+(i*3+1)%7)
+			if from == to {
+				return
+			}
+			_, v := s.post(fmt.Sprintf("r%d", i), from, to, int64(1+i*7%300))
+			s.wait(v.ID)
+		}()
+	}
+	wg.Wait()
+	s.audit()
+
+	srv := httptest.NewServer(ledger.Handler(s.pool))
+	defer srv.Close()
+	walk := func(id int64, limit int) []ledger.Line {
+		var lines []ledger.Line
+		var last ledger.Statement
+		for after := int64(0); ; after = last.Next {
+			resp, err := http.Get(fmt.Sprintf("%s/accounts/%d/statement?limit=%d&after=%d", srv.URL, id, limit, after))
+			if err != nil {
+				t.Fatal(err)
+			}
+			last = ledger.Statement{}
+			json.NewDecoder(resp.Body).Decode(&last)
+			resp.Body.Close()
+			lines = append(lines, last.Lines...)
+			if last.Next == 0 {
+				break
+			}
+		}
+		if n := len(lines); n == 0 || lines[n-1].AvailableAfter != last.Available || lines[n-1].HeldAfter != last.Held {
+			t.Fatalf("account %d: statement does not end at the balance %d/%d: %+v", id, last.Available, last.Held, lines)
+		}
+		return lines
+	}
+	closing := map[string]int64{}
+	for id := int64(1); id <= 12; id++ {
+		all := walk(id, 1000)
+		for _, limit := range []int{1, 3} {
+			if got := walk(id, limit); fmt.Sprint(got) != fmt.Sprint(all) {
+				t.Fatalf("account %d, pages of %d:\n%v\nwant\n%v", id, limit, got, all)
+			}
+		}
+		closing[ledger.SeedCurrency(id, currencies)] += all[len(all)-1].AvailableAfter + all[len(all)-1].HeldAfter
+		var steps []string
+		for _, l := range all {
+			steps = append(steps, l.Step)
+		}
+		want := map[int64]string{1: "[open hold capture hold capture refund]", 2: "[open credit]", 3: "[open]", 5: "[open]"}[id]
+		if want != "" && fmt.Sprint(steps) != want {
+			t.Errorf("account %d steps %v, want %s", id, steps, want)
+		}
+	}
+	rep, err := check.Run(ctx, s.pool, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := map[string]int64{"USD": 8 * 1000, "EUR": 4 * 1000}; fmt.Sprint(closing) != fmt.Sprint(want) || rep.CustomerSum != 12*1000 {
+		t.Fatalf("statements close at %v, audit customer sum %d; want %v", closing, rep.CustomerSum, want)
+	}
+	for u, code := range map[string]int{"/accounts/99/statement": 404, "/accounts/1/statement?limit=0": 400, "/accounts/x/statement": 400} {
+		resp, err := http.Get(srv.URL + u)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != code {
+			t.Errorf("GET %s: %d, want %d", u, resp.StatusCode, code)
+		}
+	}
+}
