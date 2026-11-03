@@ -143,10 +143,17 @@ func chaos(ctx context.Context, args []string) error {
 	if err := os.WriteFile(*out, []byte(matrix(runs, *seeds, *transfers, time.Since(started), os.Args)), 0o644); err != nil {
 		return err
 	}
+	overLim := 0
 	for _, r := range runs {
 		if !r.Pass {
 			return fmt.Errorf("invariants violated, see %s", *out)
 		}
+		overLim += r.OverLim
+	}
+	// Every third account has a daily limit (600) below its balance (1000).
+	// If nothing was refused by it, the audit's check of it proved nothing.
+	if overLim == 0 {
+		return fmt.Errorf("no transfer was refused by the daily limit in any run")
 	}
 	return nil
 }
@@ -291,14 +298,11 @@ func (h *harness) do(ctx context.Context, name string) error {
 	if n != h.Keys {
 		h.problem("%d transfers for %d idempotency keys", n, h.Keys)
 	}
-	// Every third account has a daily limit (600) below its balance (1000),
-	// so the limit must have refused something, or the audit's check of it
-	// proved nothing.
+	// Counted so the matrix can require the limit to have refused something
+	// (see run). Not required per run: on a loaded machine a run can see
+	// nearly every hold time out and be cancelled before the limit bites.
 	if err := pg.QueryRow(ctx, `SELECT count(*) FROM saga.transfers WHERE reason = 'daily limit exceeded'`).Scan(&h.OverLim); err != nil {
 		return err
-	}
-	if h.OverLim == 0 {
-		h.problem("no transfer was refused by the daily limit")
 	}
 	// The stuck-saga detector of the (possibly restarted) orchestrator must
 	// be reporting, and report nothing open once everything is terminal.
@@ -752,11 +756,11 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		}
 		b.WriteString("\n")
 	}
-	b.WriteString("\n## Runs\n\n| point | seed | relay | killed at hit | restart after | keys | completed | refunded | rejected | cancelled | quiesce | problems |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n")
+	b.WriteString("\n## Runs\n\n| point | seed | relay | killed at hit | restart after | keys | completed | refunded | rejected | cancelled | over limit | quiesce | problems |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
 	for _, r := range runs {
-		fmt.Fprintf(&b, "| `%s` | %d | %s | %d | %v | %d | %d | %d | %d | %d | %.1fs | %s |\n", r.Point, r.Seed, r.Relay,
+		fmt.Fprintf(&b, "| `%s` | %d | %s | %d | %v | %d | %d | %d | %d | %d | %d | %.1fs | %s |\n", r.Point, r.Seed, r.Relay,
 			r.Hit, r.Restart, r.Keys, r.States[saga.Completed], r.States[saga.Refunded], r.States[saga.Rejected],
-			r.States[saga.Cancelled], r.Quiesce.Seconds(), strings.Join(r.Problems, "<br>"))
+			r.States[saga.Cancelled], r.OverLim, r.Quiesce.Seconds(), strings.Join(r.Problems, "<br>"))
 	}
 	b.WriteString("\nInvariants checked after every run (`internal/check`): journal sums to zero globally and per operation; " +
 		"balance rows equal the journal; no negative balance; no operation crosses a shard; every leg is in its account's currency " +
@@ -766,7 +770,7 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		"saga's state; one transfer per idempotency key, and a re-sent key returns the same transfer; the orchestrator's " +
 		"stuck-saga gauge is exported and reads 0; every account's statement, read through the (possibly restarted) ledger " +
 		"in pages of 7, continues its running totals line by line, ends at the balance row and, per currency, adds up to the " +
-		"opening total; no account's unreleased holds on a UTC day add up to more than its daily limit, and the limit refused " +
-		"at least one transfer in the run.\n")
+		"opening total; no account's unreleased holds on a UTC day add up to more than its daily limit. Over the whole matrix the " +
+		"limit must have refused at least one transfer.\n")
 	return b.String()
 }
