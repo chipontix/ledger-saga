@@ -132,13 +132,19 @@ func seed(ctx context.Context, args []string) error {
 	bal := fs.Int64("balance", 1_000_000, "opening balance of each account, minor units")
 	frozen := fs.Int("frozen-every", 50, "freeze every n-th account (0 = none)")
 	currencies := fs.String("currencies", "USD", "comma-separated; consecutive blocks of ledger.Shards accounts take turns")
+	limit := fs.Int64("daily-limit", 0, "daily hold limit, minor units, on every -limit-every-th account (0 = none)")
+	limitEvery := fs.Int("limit-every", 3, "which accounts get -daily-limit")
 	fs.Parse(args)
 	p, err := pool(ctx)
 	if err != nil {
 		return err
 	}
 	defer p.Close()
-	return ledger.Seed(ctx, p, *n, *bal, *frozen, strings.Split(*currencies, ","))
+	if err := ledger.Seed(ctx, p, *n, *bal, *frozen, strings.Split(*currencies, ",")); err != nil || *limit == 0 {
+		return err
+	}
+	_, err = p.Exec(ctx, `UPDATE ledger.accounts SET daily_limit = $1 WHERE id % $2 = 0`, *limit, *limitEvery)
+	return err
 }
 
 func policy() saga.Policy {

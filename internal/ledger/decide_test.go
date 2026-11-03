@@ -29,6 +29,8 @@ func TestDecide(t *testing.T) {
 		{"hold insufficient", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Currency: "USD", Available: 9}, wire.Rejected, "insufficient funds", 0},
 		{"hold frozen", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Currency: "USD", Frozen: true, Available: 100}, wire.Rejected, "account frozen", 0},
 		{"hold in another currency", wire.Hold, Prior{}, eur, wire.Rejected, "currency mismatch", 0},
+		{"hold up to the daily limit", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Currency: "USD", Available: 100, DailyLimit: 50, SpentToday: 40}, wire.OK, "", 2},
+		{"hold over the daily limit", wire.Hold, Prior{}, Account{ID: 5, Exists: true, Currency: "USD", Available: 100, DailyLimit: 50, SpentToday: 41}, wire.Rejected, "daily limit exceeded", 0},
 		{"hold missing", wire.Hold, Prior{}, Account{ID: 5}, wire.Rejected, "account not found", 0},
 		{"hold after release is fenced", wire.Hold, Prior{wire.Release: wire.OK}, acct, wire.Fenced, "released before hold arrived", 0},
 		{"release active hold", wire.Release, Prior{wire.Hold: wire.OK}, acct, wire.OK, "released", 2},

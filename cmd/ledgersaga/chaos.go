@@ -54,6 +54,7 @@ type run struct {
 	Kills    int                `json:"kills"`
 	Keys     int                `json:"keys"`
 	States   map[saga.State]int `json:"states"`
+	OverLim  int                `json:"over_limit"` // transfers rejected by the daily limit
 	Absorbed map[string]float64 `json:"consumer_results"`
 	Quiesce  time.Duration      `json:"quiesce_ns"`
 	Problems []string           `json:"problems"`
@@ -224,7 +225,7 @@ func (h *harness) do(ctx context.Context, name string) error {
 		"CHAOS_REDELIVER=0.05", "CHAOS_MAX_LATE=1500ms",
 	}
 	for _, step := range [][]string{{"migrate"}, {"seed", "-accounts", strconv.Itoa(h.accounts), "-balance", "1000", "-frozen-every", "10",
-		"-currencies", strings.Join(chaosCurrencies, ",")}} {
+		"-currencies", strings.Join(chaosCurrencies, ","), "-daily-limit", "600", "-limit-every", "3"}} {
 		cmd := exec.CommandContext(ctx, h.bin, step...)
 		cmd.Env = append(os.Environ(), envs...)
 		if out, err := cmd.CombinedOutput(); err != nil {
@@ -289,6 +290,15 @@ func (h *harness) do(ctx context.Context, name string) error {
 	}
 	if n != h.Keys {
 		h.problem("%d transfers for %d idempotency keys", n, h.Keys)
+	}
+	// Every third account has a daily limit (600) below its balance (1000),
+	// so the limit must have refused something, or the audit's check of it
+	// proved nothing.
+	if err := pg.QueryRow(ctx, `SELECT count(*) FROM saga.transfers WHERE reason = 'daily limit exceeded'`).Scan(&h.OverLim); err != nil {
+		return err
+	}
+	if h.OverLim == 0 {
+		h.problem("no transfer was refused by the daily limit")
 	}
 	// The stuck-saga detector of the (possibly restarted) orchestrator must
 	// be reporting, and report nothing open once everything is terminal.
@@ -690,7 +700,7 @@ func checkCmd(ctx context.Context, args []string) error {
 func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string) string {
 	var b strings.Builder
 	commit, _ := exec.Command("git", "rev-parse", "--short", "HEAD").Output()
-	pass, kills, keys := 0, 0, 0
+	pass, kills, keys, overLim := 0, 0, 0, 0
 	totals := map[string]float64{}
 	states := map[saga.State]int{}
 	for _, r := range runs {
@@ -699,6 +709,7 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		}
 		kills += r.Kills
 		keys += r.Keys
+		overLim += r.OverLim
 		for k, v := range r.Absorbed {
 			totals[k] += v
 		}
@@ -712,7 +723,8 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 	fmt.Fprintf(&b, "**%d/%d runs passed** · %d transfers · %d SIGKILLs · every run with 10%% of saga steps having all their first deliveries "+
 		"deferred through the retry topic (so later messages overtake them), 5%% duplicated, 2%% delayed inside the batch and 5%% "+
 		"redelivered up to 1.5s late, on both consumers. Accounts are in %s; some transfers name the wrong currency "+
-		"or cross currencies and must be refused or refunded.\n\n", pass, len(runs), keys, kills, strings.Join(chaosCurrencies, " and "))
+		"or cross currencies and must be refused or refunded. Every third account has a daily hold limit of 600 against a "+
+		"balance of 1000; %d transfers were refused by it.\n\n", pass, len(runs), keys, kills, strings.Join(chaosCurrencies, " and "), overLim)
 	fmt.Fprintf(&b, "Terminal states over all runs: %v.\n\n", states)
 	fmt.Fprintf(&b, "Absorbed by the consumers that were alive at the end of each run (killed processes lose their counters): "+
 		"orchestrator %v duplicate / %v stale replies, ledger %v duplicate / %v replayed commands; %v first deliveries "+
@@ -754,6 +766,7 @@ func matrix(runs []*run, seeds, transfers int, took time.Duration, argv []string
 		"saga's state; one transfer per idempotency key, and a re-sent key returns the same transfer; the orchestrator's " +
 		"stuck-saga gauge is exported and reads 0; every account's statement, read through the (possibly restarted) ledger " +
 		"in pages of 7, continues its running totals line by line, ends at the balance row and, per currency, adds up to the " +
-		"opening total.\n")
+		"opening total; no account's unreleased holds on a UTC day add up to more than its daily limit, and the limit refused " +
+		"at least one transfer in the run.\n")
 	return b.String()
 }

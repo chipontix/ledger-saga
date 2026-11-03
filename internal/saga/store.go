@@ -187,7 +187,13 @@ func (s *Store) SweepTimeouts(ctx context.Context, limit int) (int, error) {
 	if len(due) > 0 {
 		failpoint.Hit("orch.timeout.before_commit")
 	}
-	return len(due), tx.Commit(ctx)
+	if err := tx.Commit(ctx); err != nil {
+		return 0, err
+	}
+	if len(due) > 0 {
+		failpoint.Hit("orch.timeout.after_commit")
+	}
+	return len(due), nil
 }
 
 // Stuck counts open transfers accepted more than after ago, by state, and

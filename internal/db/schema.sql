@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS ledger.accounts (
     frozen    boolean NOT NULL DEFAULT false,
     currency  text    NOT NULL CHECK (currency ~ '^[A-Z]{3}$')
 );
+-- What holds may take per UTC day; NULL = no limit (ADR-0011).
+ALTER TABLE ledger.accounts ADD COLUMN IF NOT EXISTS daily_limit bigint CHECK (daily_limit > 0);
 
 -- One row per (saga, step): the business-level idempotency key. Rejections
 -- and fences are recorded too, so a duplicate replays the original answer.
@@ -76,6 +78,9 @@ CREATE TABLE IF NOT EXISTS ledger.operations (
     at         timestamptz NOT NULL DEFAULT now(),
     UNIQUE (saga_id, step)
 );
+-- Today's holds per account, for the daily limit (ADR-0011).
+CREATE INDEX IF NOT EXISTS holds_by_account_day ON ledger.operations (account_id, at)
+    WHERE step = 'hold' AND outcome = 'ok';
 
 CREATE TABLE IF NOT EXISTS ledger.entries (
     op_id      bigint NOT NULL REFERENCES ledger.operations (id),

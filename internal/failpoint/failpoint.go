@@ -21,8 +21,9 @@ var Points = []struct{ Name, Process string }{
 	{"orch.reply.before_commit", "orchestrator"}, // transition computed, not committed
 	{"orch.reply.after_commit", "orchestrator"},  // committed, Kafka offset not committed
 	{"orch.timeout.before_commit", "orchestrator"},
-	{"ledger.before_commit", "ledger"}, // money moved in tx, not committed
-	{"ledger.after_commit", "ledger"},  // committed, Kafka offset not committed
+	{"orch.timeout.after_commit", "orchestrator"}, // retry or release committed, sweep not returned
+	{"ledger.before_commit", "ledger"},            // money moved in tx, not committed
+	{"ledger.after_commit", "ledger"},             // committed, Kafka offset not committed
 	{"relay.poll.before_publish", "relay-poll"},
 	{"relay.poll.after_publish", "relay-poll"}, // in Kafka, outbox rows not deleted
 	{"relay.cdc.handler", "relay-cdc"},         // decoded from WAL, not yet in Kafka

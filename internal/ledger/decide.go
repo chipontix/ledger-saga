@@ -50,6 +50,11 @@ type Account struct {
 	Currency  string
 	Available int64
 	Held      int64
+	// DailyLimit caps what holds may take from the account per UTC day
+	// (0 = no limit); SpentToday is what today's holds already took, minus
+	// those released. Store.Handle reads both under the account's row lock.
+	DailyLimit int64
+	SpentToday int64
 }
 
 // Prior is what this ledger already recorded for the saga, by step.
@@ -84,6 +89,8 @@ func Decide(cmd wire.Command, prior Prior, a Account) Decision {
 			return reject("currency mismatch")
 		case a.Available < x:
 			return reject("insufficient funds")
+		case a.DailyLimit > 0 && a.SpentToday+x > a.DailyLimit:
+			return reject("daily limit exceeded")
 		}
 		return Decision{Outcome: wire.OK, Entries: []Entry{{a.ID, Available, -x}, {a.ID, Held, x}}}
 

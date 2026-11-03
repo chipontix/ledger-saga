@@ -242,6 +242,30 @@ func Run(ctx context.Context, db *pgxpool.Pool, quiescent bool) (*Report, error)
 		return nil, err
 	}
 
+	// 9. No account's holds took more on a UTC day than its daily limit,
+	// counting a hold until it is released (ADR-0011).
+	rows, err = tx.Query(ctx, `
+		SELECT h.account_id, (h.at AT TIME ZONE 'UTC')::date::text, sum(h.amount), a.daily_limit
+		FROM ledger.operations h JOIN ledger.accounts a ON a.id = h.account_id
+		WHERE h.step = 'hold' AND h.outcome = 'ok' AND a.daily_limit IS NOT NULL
+		  AND NOT EXISTS (SELECT 1 FROM ledger.operations r
+		                  WHERE r.saga_id = h.saga_id AND r.step = 'release' AND r.reason = 'released')
+		GROUP BY h.account_id, 2, a.daily_limit HAVING sum(h.amount) > a.daily_limit`)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var acct, spent, limit int64
+		var day string
+		if err := rows.Scan(&acct, &day, &spent, &limit); err != nil {
+			return nil, err
+		}
+		r.fail("account %d: holds took %d on %s, daily limit %d", acct, spent, day, limit)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	if quiescent && held != 0 {
 		r.fail("at rest but %d held", held)
 	}

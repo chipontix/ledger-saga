@@ -601,3 +601,54 @@ func TestStatementAgreesWithAudit(t *testing.T) {
 		}
 	}
 }
+
+// A daily limit holds under concurrent holds on one account, and the audit
+// reports holds over it (ADR-0011).
+func TestDailyLimit(t *testing.T) {
+	ctx := context.Background()
+	s := newSystem(t, "poll", 12, saga.Policy{StepTimeout: 5 * time.Second, MaxBackoff: 10 * time.Second, HoldAttempts: 3})
+	if _, err := s.pool.Exec(ctx, `UPDATE ledger.accounts SET daily_limit = 300 WHERE id = 1`); err != nil {
+		t.Fatal(err)
+	}
+	// Ten holds of 100 race for the row lock of account 1, which has the
+	// balance for all of them but the limit for three.
+	var wg sync.WaitGroup
+	got := make([]view, 10)
+	for i := range got {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, v := s.post(fmt.Sprintf("l%d", i), 1, 2, 100)
+			got[i] = s.wait(v.ID)
+		}()
+	}
+	wg.Wait()
+	n := map[string]int{}
+	for _, v := range got {
+		n[string(v.State)+"/"+v.Reason]++
+	}
+	if n["COMPLETED/"] != 3 || n["REJECTED/daily limit exceeded"] != 7 {
+		t.Fatalf("outcomes %v, want 3 completed and 7 over the limit", n)
+	}
+	// A completed transfer stays counted, and the limit is per account.
+	if _, v := s.post("l-more", 1, 2, 1); s.wait(v.ID).Reason != "daily limit exceeded" {
+		t.Error("account 1 took more after reaching its limit")
+	}
+	if _, v := s.post("l-other", 3, 2, 400); s.wait(v.ID).State != saga.Completed {
+		t.Error("account 3 has no limit but was refused")
+	}
+	s.audit()
+
+	// A forged hold that the ledger would have refused is reported.
+	if _, err := s.pool.Exec(ctx, `INSERT INTO ledger.operations (saga_id, step, account_id, amount, currency, outcome)
+		VALUES (gen_random_uuid(), 'hold', 1, 1, 'USD', 'ok')`); err != nil {
+		t.Fatal(err)
+	}
+	rep, err := check.Run(ctx, s.pool, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(strings.Join(rep.Violations, "\n"), "account 1: holds took 301 on ") {
+		t.Fatalf("violations %q: want account 1 over its daily limit", rep.Violations)
+	}
+}

@@ -65,13 +65,24 @@ func (s *Store) Handle(ctx context.Context, c wire.Command) (string, error) {
 	if d == nil {
 		result = "applied"
 		a := Account{ID: c.Account}
-		err := tx.QueryRow(ctx, `SELECT available, held, frozen, currency FROM ledger.accounts WHERE id = $1 FOR UPDATE`,
-			c.Account).Scan(&a.Available, &a.Held, &a.Frozen, &a.Currency)
+		var limit *int64
+		err := tx.QueryRow(ctx, `SELECT available, held, frozen, currency, daily_limit FROM ledger.accounts WHERE id = $1 FOR UPDATE`,
+			c.Account).Scan(&a.Available, &a.Held, &a.Frozen, &a.Currency, &limit)
 		switch {
 		case err == nil:
 			a.Exists = true
 		case !errors.Is(err, pgx.ErrNoRows):
 			return "", err
+		}
+		if limit != nil && c.Step == wire.Hold {
+			// A statement of its own, after the row lock: it then sees every
+			// hold committed by whoever held the lock before us. As a subquery
+			// of the locking SELECT it would read the snapshot taken before
+			// the wait, and two holds could both fit under the limit.
+			a.DailyLimit = *limit
+			if err := tx.QueryRow(ctx, spentToday, c.Account).Scan(&a.SpentToday); err != nil {
+				return "", err
+			}
 		}
 		dec := Decide(c, prior, a)
 		d = &dec
@@ -92,6 +103,15 @@ func (s *Store) Handle(ctx context.Context, c wire.Command) (string, error) {
 	failpoint.Hit("ledger.after_commit")
 	return result, nil
 }
+
+// spentToday is what holds took from account $1 since the start of the
+// current UTC day, minus those released. Captured holds stay counted: the
+// money left the account, and a later refund does not make room.
+const spentToday = `SELECT coalesce(sum(h.amount), 0) FROM ledger.operations h
+	WHERE h.account_id = $1 AND h.step = 'hold' AND h.outcome = 'ok'
+	  AND h.at >= date_trunc('day', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'
+	  AND NOT EXISTS (SELECT 1 FROM ledger.operations r
+	                  WHERE r.saga_id = h.saga_id AND r.step = 'release' AND r.reason = 'released')`
 
 func (s *Store) record(ctx context.Context, tx pgx.Tx, c wire.Command, d Decision) error {
 	var opID int64
