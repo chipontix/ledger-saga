@@ -12,13 +12,14 @@ boundary and then audits the books.
 | claim | evidence |
 |---|---|
 | Money is conserved and nothing is applied twice, under any delivery order, duplication or loss | property test: rapid drives the real state machine and ledger decision function through adversarial schedules (`internal/sim`) |
-| …and under real crashes | [crash matrix](docs/chaos-matrix.md): 11 crash points × 5 seeds + 5 no-crash baselines = **60/60 runs pass**, 12,062 transfers, 55 SIGKILLs, with duplicates, reordering and late redelivery injected on every run |
+| …and under real crashes | [crash matrix](docs/chaos-matrix.md): 12 crash points × 5 seeds + 5 no-crash baselines = **65/65 runs pass**, 13,072 transfers, 60 SIGKILLs, with duplicates, reordering and late redelivery injected on every run |
 | …and under load | every benchmark run ends with the same audit: **292,204 sagas over 7 runs, 0 violations** |
 | Money never crosses currencies | the property test draws account currencies and lets clients name the wrong one; removing the currency check from either hold or credit fails on the first schedule. Every chaos run seeds USD and EUR accounts, and the audit checks conservation per currency and that every leg is in its account's currency. A forged operation that balances but pays EUR into a USD account is reported ([ADR-0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md)) |
 | A stuck saga pages someone | `saga_stuck{state}` and `saga_oldest_open_seconds` from the orchestrator, with the `SagaStuck` and `SagaStuckDetectorAbsent` alerts tested by `promtool test rules` in CI. An integration test shows an undeliverable saga being counted. Every chaos run requires the restarted orchestrator to export the gauge and read 0 at rest ([ADR-0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md)) |
 | An account's statement adds up to its balance | `GET /accounts/{id}/statement` on the ledger, built from the journal alone. An integration test reads it in pages of 1, 3 and 1000 lines and gets the same list, which ends at the balance row and, per currency, sums to what the audit says. After every chaos run each account's statement, read in pages of 7 through the possibly restarted ledger, must do the same ([ADR-0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md)) |
+| A daily limit holds under concurrent holds | `daily_limit` on the account is checked at hold, under the account's row lock, against what today's unreleased holds already took. An integration test races ten holds of 100 against a limit of 300 and gets exactly 3 through; moving the sum into the locking `SELECT` lets 4 through. The audit checks every account and UTC day against its limit, and reports a forged hold over it. Every chaos run limits every third account and must see the limit refuse something ([ADR-0011](docs/adr/0011-daily-hold-limit-checked-under-the-account-lock.md)) |
 | The harness can see a bug | removing the one `if` that fences a late hold makes 6 of 8 runs fail; the harness had to be changed before it could see it ([ADR-0007](docs/adr/0007-crash-harness-real-processes-sigkill-at-named-points.md)) |
-| No data races | `go test -race` on every package, unit and integration; one seed of the crash matrix on race-enabled binaries of all three services: 12/12 runs, 0 race reports (CI repeats this on every push) |
+| No data races | `go test -race` on every package, unit and integration; one seed of the crash matrix on race-enabled binaries of all three services: 12/12 runs, 0 race reports, measured before the 12th crash point was added (CI repeats it on every push, now 13 runs) |
 | Each idempotency layer holds on its own boundary | Testcontainers tests on Postgres 17 + Kafka 3.9: 32 concurrent POSTs with one key create one transfer; a poison message goes to the DLQ and the partition moves on; a retried hold replays the original refusal after the account is topped up |
 
 ## Numbers
@@ -35,7 +36,7 @@ two consumers), not the POST.
 | recovery after SIGKILL, process down 5–10 s, 100 clients | backlog accepted before the restart is terminal **0.7 s** after restart (ledger), **0.5 s** (orchestrator), **3.2 s** (relay); 0 transfers cancelled; 0 violations |
 | outbox → consumer delivery, 100 clients | p50 16–23 ms, p99 62–85 ms, CDC and poller alike |
 | database cost at idle | poller +178 transactions/s, CDC +1 |
-| crash matrix wall time | 6 min 57 s for 60 runs, 4 in parallel |
+| crash matrix wall time | 10 min 24 s for 65 runs, 4 in parallel, with the host's load average at 90–110 from other work |
 
 Per-run tables: [CDC vs poller (ADR-0004)](docs/adr/0004-transactional-outbox-cdc-and-poller.md#measurements),
 [crash matrix](docs/chaos-matrix.md).
@@ -91,7 +92,7 @@ flowchart LR
 
 States: `HOLD_PENDING → CAPTURE_PENDING → CREDIT_PENDING → COMPLETED`;
 `HOLD_PENDING → REJECTED` (insufficient funds, frozen source, source not in
-the transfer's currency);
+the transfer's currency, daily limit exceeded);
 `HOLD_PENDING → RELEASE_PENDING → CANCELLED` (hold timed out);
 `CREDIT_PENDING → REFUND_PENDING → REFUNDED` (destination frozen, missing or
 in another currency).
@@ -110,6 +111,7 @@ in another currency).
 | [0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md) | Currencies: the client names one, the ledger checks it at hold and credit, no conversion; per-currency invariants |
 | [0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md) | Stuck sagas: a periodic gauge, an alert, and an alert on the detector's absence |
 | [0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md) | Account statement from the journal; why paging by operation id is safe here |
+| [0011](docs/adr/0011-daily-hold-limit-checked-under-the-account-lock.md) | Daily hold limit: summed after the row lock, not before; audit invariant per account and UTC day; crash point after the sweeper's commit |
 
 ## Reproduce
 
