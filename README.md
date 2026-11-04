@@ -19,12 +19,13 @@ boundary and then audits the books.
 | An account's statement adds up to its balance | `GET /accounts/{id}/statement` on the ledger, built from the journal alone. An integration test reads it in pages of 1, 3 and 1000 lines and gets the same list, which ends at the balance row and, per currency, sums to what the audit says. After every chaos run each account's statement, read in pages of 7 through the possibly restarted ledger, must do the same ([ADR-0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md)) |
 | A daily limit holds under concurrent holds | `daily_limit` on the account is checked at hold, under the account's row lock, against what today's unreleased holds already took. An integration test races ten holds of 100 against a limit of 300 and gets exactly 3 through; moving the sum into the locking `SELECT` lets 4 through. The audit checks every account and UTC day against its limit, and reports a forged hold over it. Every chaos run limits every third account and must see the limit refuse something ([ADR-0011](docs/adr/0011-daily-hold-limit-checked-under-the-account-lock.md)) |
 | The harness can see a bug | removing the one `if` that fences a late hold makes 6 of 8 runs fail; the harness had to be changed before it could see it ([ADR-0007](docs/adr/0007-crash-harness-real-processes-sigkill-at-named-points.md)) |
-| No data races | `go test -race` on every package, unit and integration; one seed of the crash matrix on race-enabled binaries of all three services: 12/12 runs, 0 race reports, measured before the 12th crash point was added (CI repeats it on every push, now 13 runs) |
+| No data races | `go test -race` on every package, unit and integration, in CI on every push. CI also runs one seed of the crash matrix on race-enabled binaries of all three services, but see Limitations: the harness does not scan their output for race reports |
 | Each idempotency layer holds on its own boundary | Testcontainers tests on Postgres 17 + Kafka 3.9: 32 concurrent POSTs with one key create one transfer; a poison message goes to the DLQ and the partition moves on; a retried hold replays the original refusal after the account is topped up |
 
 ## Numbers
 
-All from real runs; raw output in [`results/`](results/). Closed-loop
+All from real runs; raw output in [`results/`](results/), and
+`python3 scripts/numbers.py` prints them back from there. Closed-loop
 clients: each creates a transfer and long-polls it until terminal, so the
 latency is the whole saga (three ledger round trips through two relays and
 two consumers), not the POST.
@@ -37,6 +38,16 @@ two consumers), not the POST.
 | outbox → consumer delivery, 100 clients | p50 16–23 ms, p99 62–85 ms, CDC and poller alike |
 | database cost at idle | poller +178 transactions/s, CDC +1 |
 | crash matrix wall time | 10 min 24 s for 65 runs, 4 in parallel, with the host's load average at 90–110 from other work |
+
+**When the load numbers were taken.** The load and recovery runs are from
+2026-10-23, commit `66ee2b6` (`results/bench/hardware.txt`). Since then the
+ledger gained the currency check, the stuck-saga query, the statement index
+(one more index insert per customer leg, ADR-0010) and the daily-limit query
+(only on accounts that have a limit; the benchmark's accounts have none,
+ADR-0011). The statement index in particular may move these numbers. They
+have not been re-measured yet: the next run waits for a quiet host, since
+other work on the same laptop kept the load average near 100 this week. The
+crash matrix row is from 2026-11-03, on the current code.
 
 Per-run tables: [CDC vs poller (ADR-0004)](docs/adr/0004-transactional-outbox-cdc-and-poller.md#measurements),
 [crash matrix](docs/chaos-matrix.md).
@@ -56,6 +67,30 @@ tighter numbers on dedicated hardware.
 32 messages at a time and commits after the slowest one. More partitions
 and consumer instances, or the batch consumer with one transaction per
 batch, are the next step; Postgres is not the limit yet.
+
+## Limitations
+
+- The load numbers predate the last four changes (see above) and are not
+  re-measured yet.
+- Shards are logical: all four live in one `ledger` schema on one Postgres.
+  Every ledger transaction stays inside one shard, and the audit checks
+  that, so they could be split into separate databases; that split has not
+  been done or measured. Kafka is a single broker.
+- No currency conversion: a transfer between currencies is refunded
+  ([ADR-0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md)).
+- The daily limit uses the UTC day for every account, and limits are not
+  versioned: the audit judges past days by the current limit
+  ([ADR-0011](docs/adr/0011-daily-hold-limit-checked-under-the-account-lock.md)).
+- A statement page recomputes running totals over the account's whole
+  history, fine for thousands of lines, not millions
+  ([ADR-0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md)).
+- At 1000 clients the ledger consumer is the bottleneck; more partitions
+  and consumers, or batch consumption, are not implemented.
+- The chaos harness does not scan process output for race reports, and the
+  CI artifact keeps no process logs, so the race-enabled matrix run in CI
+  only shows that the services survive and the books audit clean, not that
+  they are race-free. An earlier README claimed 0 race reports there; it
+  could not be re-checked from anything kept, so it was removed.
 
 ## Architecture
 
