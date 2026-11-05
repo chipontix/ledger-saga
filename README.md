@@ -13,7 +13,7 @@ boundary and then audits the books.
 |---|---|
 | Money is conserved and nothing is applied twice, under any delivery order, duplication or loss | property test: rapid drives the real state machine and ledger decision function through adversarial schedules (`internal/sim`) |
 | …and under real crashes | [crash matrix](docs/chaos-matrix.md): 12 crash points × 5 seeds + 5 no-crash baselines = **65/65 runs pass**, 13,072 transfers, 60 SIGKILLs, with duplicates, reordering and late redelivery injected on every run |
-| …and under load | every benchmark run ends with the same audit: **292,204 sagas over 7 runs, 0 violations** |
+| …and under load | every benchmark run ends with the same audit: **421,785 sagas over 7 runs, 0 violations** |
 | Money never crosses currencies | the property test draws account currencies and lets clients name the wrong one; removing the currency check from either hold or credit fails on the first schedule. Every chaos run seeds USD and EUR accounts, and the audit checks conservation per currency and that every leg is in its account's currency. A forged operation that balances but pays EUR into a USD account is reported ([ADR-0008](docs/adr/0008-currencies-checked-by-the-ledger-no-conversion.md)) |
 | A stuck saga pages someone | `saga_stuck{state}` and `saga_oldest_open_seconds` from the orchestrator, with the `SagaStuck` and `SagaStuckDetectorAbsent` alerts tested by `promtool test rules` in CI. An integration test shows an undeliverable saga being counted. Every chaos run requires the restarted orchestrator to export the gauge and read 0 at rest ([ADR-0009](docs/adr/0009-stuck-sagas-are-a-gauge-and-an-alert.md)) |
 | An account's statement adds up to its balance | `GET /accounts/{id}/statement` on the ledger, built from the journal alone. An integration test reads it in pages of 1, 3 and 1000 lines and gets the same list, which ends at the balance row and, per currency, sums to what the audit says. After every chaos run each account's statement, read in pages of 7 through the possibly restarted ledger, must do the same ([ADR-0010](docs/adr/0010-account-statement-from-the-journal-paged-by-operation.md)) |
@@ -32,46 +32,46 @@ two consumers), not the POST.
 
 | measurement | result |
 |---|---|
-| throughput, 100 clients | 615–768 sagas/s over 4 runs (CDC and poller), saga p50 118–146 ms, p99 200–490 ms |
-| throughput, 1000 clients | 742–825 sagas/s over 3 clean runs, p99 2.6–2.9 s: saturated, commands queue in front of the ledger consumer while Postgres uses ~1.2 of 4 cores |
-| recovery after SIGKILL, process down 5–10 s, 100 clients | backlog accepted before the restart is terminal **0.7 s** after restart (ledger), **0.5 s** (orchestrator), **3.2 s** (relay); 0 transfers cancelled; 0 violations |
-| outbox → consumer delivery, 100 clients | p50 16–23 ms, p99 62–85 ms, CDC and poller alike |
-| database cost at idle | poller +178 transactions/s, CDC +1 |
+| throughput, 100 clients | 825 sagas/s (CDC) and 899 (poller), saga p50 118 / 108 ms, p99 194 / 179 ms |
+| throughput, 1000 clients | 903 sagas/s (CDC) and 901 (poller), p99 2.4 s: saturated, commands queue in front of the ledger consumer while Postgres uses ~1.3 of 4 cores |
+| recovery after SIGKILL, process down 5.2–5.3 s, 100 clients | backlog accepted before the restart is terminal **0.4 s** after restart (ledger), **0.3 s** (orchestrator), **3.1 s** (relay); 0 transfers cancelled; 0 violations |
+| outbox → consumer delivery, 100 clients | p50 11–17 ms, p99 34–43 ms, CDC and poller alike |
+| database cost at idle | poller +178 transactions/s, CDC +1 (2026-10-23 run, `results/bench/idle-db-tx.txt`; `make bench` does not repeat it) |
 | crash matrix wall time | 10 min 24 s for 65 runs, 4 in parallel, with the host's load average at 90–110 from other work |
 
-**When the load numbers were taken.** The load and recovery runs are from
-2026-10-23, commit `66ee2b6` (`results/bench/hardware.txt`). Since then the
-ledger gained the currency check, the stuck-saga query, the statement index
-(one more index insert per customer leg, ADR-0010) and the daily-limit query
-(only on accounts that have a limit; the benchmark's accounts have none,
-ADR-0011). The statement index in particular may move these numbers. They
-have not been re-measured yet: the next run waits for a quiet host, since
-other work on the same laptop kept the load average near 100 this week. The
-crash matrix row is from 2026-11-03, on the current code.
+**When the load numbers were taken.** The load and recovery runs are one
+pass of `make bench` on 2026-11-05, commit `b2c4400`, i.e. the current code
+with the currency check, the stuck-saga query, the statement index and the
+daily-limit query (`results/bench/hardware.txt`). The host's load average was
+5.3–7.1 during the 15 minutes of the run. Compared with the 2026-10-23 pass on
+`66ee2b6` (4 runs at 100 clients, 615–768 sagas/s, on a host near load 100)
+throughput went up rather than down; the busier host then is the likelier
+cause than the code, so the two passes say nothing about the statement
+index's cost. One pass per configuration also means no spread is reported.
+The crash matrix row is from 2026-11-03, on the current code.
 
 Per-run tables: [CDC vs poller (ADR-0004)](docs/adr/0004-transactional-outbox-cdc-and-poller.md#measurements),
 [crash matrix](docs/chaos-matrix.md).
 
 **Hardware.** Apple M4 Max (16 cores, 48 GiB) host; everything runs in one
-colima VM with 4 vCPU and 4 GiB, shared with other workloads on the same
-laptop (the host was swapping during the runs). Container limits: Kafka
+colima VM with 4 vCPU and 6 GiB, shared with other workloads on the same
+laptop. Container limits: Kafka
 1.5 GiB (1 GiB heap), Postgres 1 GiB (`shared_buffers=256MB`), each service
 256 MiB. Postgres 17.6 with `synchronous_commit=on`, Kafka 3.9.1 single
-broker, 16 partitions per topic, `acks=all`. Two of the runs contain
-multi-second disk stalls of the VM (iowait up to 98% with no block writes);
-they are left in, which is why the ranges are wide. Expect higher and
-tighter numbers on dedicated hardware.
+broker, 16 partitions per topic, `acks=all`. VM iowait stayed at or below 5%
+in every run (`results/bench/*.vmstat.txt`). Expect higher numbers on
+dedicated hardware.
 
 **Where the ceiling is.** At 1000 clients the ledger consumer is the queue
-(command delivery p50 364 ms vs 21 ms for replies): kafka-konsumer handles
+(command delivery p50 289–296 ms vs 13–16 ms for replies): kafka-konsumer handles
 32 messages at a time and commits after the slowest one. More partitions
 and consumer instances, or the batch consumer with one transaction per
 batch, are the next step; Postgres is not the limit yet.
 
 ## Limitations
 
-- The load numbers predate the last four changes (see above) and are not
-  re-measured yet.
+- The load numbers are one pass per configuration on a shared laptop; no
+  spread across runs is reported.
 - Shards are logical: all four live in one `ledger` schema on one Postgres.
   Every ledger transaction stays inside one shard, and the audit checks
   that, so they could be split into separate databases; that split has not

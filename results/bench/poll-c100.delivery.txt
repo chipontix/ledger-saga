@@ -1,1 +1,1 @@
-p50_ledger_ms=22.5 p50_orchestrator_ms=15.7 p99_ledger_ms=72.6 p99_orchestrator_ms=61.9 
+p50_ledger_ms=15.3 p50_orchestrator_ms=11.5 p99_orchestrator_ms=33.9 p99_ledger_ms=43.1 

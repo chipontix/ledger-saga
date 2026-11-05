@@ -53,8 +53,14 @@ purpose.
 `scripts/bench.sh`, closed-loop clients (each creates a transfer and
 long-polls it to a terminal state), 4 vCPU / 4 GiB colima VM on a shared
 laptop, services at commit `66ee2b6`. Two passes: A (first) and B (with
-Prometheus delivery quantiles and per-container CPU). Raw files in
-`results/bench/`.
+Prometheus delivery quantiles and per-container CPU). Their raw files were
+in `results/bench/` until 2026-11-05 and are in the git history from `b2c4400`
+back.
+
+A third pass on 2026-11-05 (commit `b2c4400`, 6 GiB VM, host load 5.3–7.1)
+replaced them in `results/bench/`: CDC 825 / poller 899 sagas/s at 100 clients,
+903 / 901 at 1000. The relays are still a tie and the ledger consumer is
+still the queue at 1000 clients (README, Numbers).
 
 | | CDC | poller |
 |---|---|---|

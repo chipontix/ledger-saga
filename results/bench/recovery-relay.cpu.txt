@@ -1,0 +1,166 @@
+ledger-1 0.00% 4.996MiB / 256MiB
+orchestrator-1 4.38% 13.86MiB / 256MiB
+relay-1 0.73% 8.078MiB / 256MiB
+postgres-1 0.85% 109.6MiB / 1GiB
+kafka-1 5.56% 447.2MiB / 1.5GiB
+grafana-1 1.21% 91.98MiB / 256MiB
+prometheus-1 0.11% 19.66MiB / 384MiB
+load-run-84b03e512d63 0.00% 9.441MiB / 256MiB
+--
+load-run-84b03e512d63 6.05% 13.09MiB / 256MiB
+ledger-1 32.35% 17.64MiB / 256MiB
+orchestrator-1 35.50% 26.83MiB / 256MiB
+relay-1 37.44% 16.75MiB / 256MiB
+postgres-1 132.18% 203.4MiB / 1GiB
+kafka-1 124.83% 561.3MiB / 1.5GiB
+grafana-1 0.18% 97.15MiB / 256MiB
+prometheus-1 0.12% 20.43MiB / 384MiB
+--
+load-run-84b03e512d63 8.85% 13.52MiB / 256MiB
+ledger-1 37.54% 18.2MiB / 256MiB
+orchestrator-1 41.93% 27.83MiB / 256MiB
+relay-1 38.11% 17.77MiB / 256MiB
+postgres-1 162.60% 239MiB / 1GiB
+kafka-1 60.37% 613.6MiB / 1.5GiB
+grafana-1 0.05% 97.15MiB / 256MiB
+prometheus-1 0.11% 20.52MiB / 384MiB
+--
+load-run-84b03e512d63 9.51% 13.82MiB / 256MiB
+ledger-1 41.05% 18.25MiB / 256MiB
+orchestrator-1 46.17% 27.52MiB / 256MiB
+relay-1 42.41% 18.97MiB / 256MiB
+postgres-1 180.39% 272MiB / 1GiB
+kafka-1 33.23% 573.3MiB / 1.5GiB
+grafana-1 0.06% 97.15MiB / 256MiB
+prometheus-1 0.12% 20.56MiB / 384MiB
+--
+load-run-84b03e512d63 8.02% 14.02MiB / 256MiB
+ledger-1 33.63% 18.53MiB / 256MiB
+orchestrator-1 41.05% 28.32MiB / 256MiB
+relay-1 38.21% 16.7MiB / 256MiB
+postgres-1 160.41% 302.7MiB / 1GiB
+kafka-1 29.12% 576.3MiB / 1.5GiB
+grafana-1 0.06% 97.15MiB / 256MiB
+prometheus-1 0.06% 20.66MiB / 384MiB
+--
+load-run-84b03e512d63 9.17% 14.32MiB / 256MiB
+ledger-1 33.78% 18.59MiB / 256MiB
+orchestrator-1 37.52% 28.72MiB / 256MiB
+relay-1 36.63% 16.43MiB / 256MiB
+postgres-1 144.17% 337.8MiB / 1GiB
+kafka-1 106.57% 688.7MiB / 1.5GiB
+grafana-1 0.06% 97.15MiB / 256MiB
+prometheus-1 0.08% 20.68MiB / 384MiB
+--
+load-run-84b03e512d63 9.26% 14.49MiB / 256MiB
+ledger-1 39.53% 18.53MiB / 256MiB
+orchestrator-1 45.28% 26.58MiB / 256MiB
+relay-1 42.70% 13.23MiB / 256MiB
+postgres-1 181.29% 370.8MiB / 1GiB
+kafka-1 31.99% 572MiB / 1.5GiB
+grafana-1 0.22% 97.19MiB / 256MiB
+prometheus-1 0.08% 20.71MiB / 384MiB
+--
+load-run-84b03e512d63 0.00% 14.35MiB / 256MiB
+ledger-1 0.78% 19.64MiB / 256MiB
+orchestrator-1 0.98% 29.44MiB / 256MiB
+postgres-1 1.51% 372.8MiB / 1GiB
+kafka-1 3.02% 570.5MiB / 1.5GiB
+grafana-1 0.07% 97.19MiB / 256MiB
+prometheus-1 0.08% 20.79MiB / 384MiB
+--
+load-run-84b03e512d63 9.33% 14.46MiB / 256MiB
+ledger-1 40.25% 18.71MiB / 256MiB
+orchestrator-1 44.36% 28.25MiB / 256MiB
+relay-1 42.57% 20.35MiB / 256MiB
+postgres-1 178.32% 388.1MiB / 1GiB
+kafka-1 39.60% 583.5MiB / 1.5GiB
+grafana-1 0.06% 97.19MiB / 256MiB
+prometheus-1 0.09% 20.97MiB / 384MiB
+--
+load-run-84b03e512d63 8.54% 14.73MiB / 256MiB
+ledger-1 39.83% 19.24MiB / 256MiB
+orchestrator-1 42.90% 26.84MiB / 256MiB
+relay-1 43.47% 12.63MiB / 256MiB
+postgres-1 173.53% 421.9MiB / 1GiB
+kafka-1 35.77% 579.4MiB / 1.5GiB
+grafana-1 0.04% 97.14MiB / 256MiB
+prometheus-1 0.04% 21.11MiB / 384MiB
+--
+load-run-84b03e512d63 7.67% 15.11MiB / 256MiB
+ledger-1 35.91% 18.26MiB / 256MiB
+orchestrator-1 40.79% 27.15MiB / 256MiB
+relay-1 41.26% 20.58MiB / 256MiB
+postgres-1 155.39% 456.8MiB / 1GiB
+kafka-1 91.92% 655.9MiB / 1.5GiB
+grafana-1 0.07% 97.11MiB / 256MiB
+prometheus-1 0.01% 21.16MiB / 384MiB
+--
+load-run-84b03e512d63 9.02% 15.18MiB / 256MiB
+ledger-1 41.22% 19.2MiB / 256MiB
+orchestrator-1 44.95% 26.33MiB / 256MiB
+relay-1 44.92% 21.2MiB / 256MiB
+postgres-1 181.16% 484.4MiB / 1GiB
+kafka-1 22.99% 580MiB / 1.5GiB
+grafana-1 0.21% 97.12MiB / 256MiB
+prometheus-1 0.04% 21.22MiB / 384MiB
+--
+load-run-84b03e512d63 9.47% 15.61MiB / 256MiB
+ledger-1 40.16% 18.76MiB / 256MiB
+orchestrator-1 44.60% 26.55MiB / 256MiB
+relay-1 44.83% 25.37MiB / 256MiB
+postgres-1 156.45% 498.3MiB / 1GiB
+kafka-1 23.42% 589.1MiB / 1.5GiB
+grafana-1 0.08% 97.12MiB / 256MiB
+prometheus-1 0.12% 21.29MiB / 384MiB
+--
+load-run-84b03e512d63 7.65% 15.63MiB / 256MiB
+ledger-1 36.42% 18.64MiB / 256MiB
+orchestrator-1 40.22% 27.3MiB / 256MiB
+relay-1 40.63% 24.69MiB / 256MiB
+postgres-1 158.82% 545.5MiB / 1GiB
+kafka-1 78.21% 702.8MiB / 1.5GiB
+grafana-1 0.07% 97.12MiB / 256MiB
+prometheus-1 0.13% 21.38MiB / 384MiB
+--
+load-run-84b03e512d63 7.68% 16.21MiB / 256MiB
+ledger-1 37.69% 18.63MiB / 256MiB
+orchestrator-1 42.28% 27.49MiB / 256MiB
+relay-1 40.45% 18.83MiB / 256MiB
+postgres-1 166.57% 509.4MiB / 1GiB
+kafka-1 55.73% 632.9MiB / 1.5GiB
+grafana-1 0.08% 97.12MiB / 256MiB
+prometheus-1 0.07% 21.46MiB / 384MiB
+--
+ledger-1 0.89% 19.43MiB / 256MiB
+orchestrator-1 0.98% 24.69MiB / 256MiB
+relay-1 0.99% 13.56MiB / 256MiB
+postgres-1 1.47% 502.5MiB / 1GiB
+kafka-1 11.11% 591.3MiB / 1.5GiB
+grafana-1 0.07% 97.1MiB / 256MiB
+prometheus-1 0.04% 21.58MiB / 384MiB
+--
+ledger-1 0.51% 20.06MiB / 256MiB
+orchestrator-1 0.87% 25.94MiB / 256MiB
+relay-1 1.02% 14.05MiB / 256MiB
+postgres-1 1.27% 503.3MiB / 1GiB
+kafka-1 78.17% 700MiB / 1.5GiB
+grafana-1 0.08% 97.3MiB / 256MiB
+prometheus-1 0.04% 21.65MiB / 384MiB
+--
+ledger-1 0.50% 20.78MiB / 256MiB
+orchestrator-1 0.82% 26.63MiB / 256MiB
+relay-1 0.89% 15.22MiB / 256MiB
+postgres-1 1.25% 503.1MiB / 1GiB
+kafka-1 84.10% 703.2MiB / 1.5GiB
+grafana-1 0.09% 97.3MiB / 256MiB
+prometheus-1 0.05% 21.72MiB / 384MiB
+--
+ledger-1 0.48% 20.79MiB / 256MiB
+orchestrator-1 0.75% 26.67MiB / 256MiB
+relay-1 0.97% 16.03MiB / 256MiB
+postgres-1 1.32% 503.2MiB / 1GiB
+kafka-1 85.64% 588MiB / 1.5GiB
+grafana-1 0.09% 97.3MiB / 256MiB
+prometheus-1 0.08% 21.79MiB / 384MiB
+--
